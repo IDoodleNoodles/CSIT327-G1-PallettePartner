@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
+  </head>
+  <body>
+    <main class="container">
+      <h1>{{ title }}</h1>
+      <p>{{ message }}</p>
+
+      <section class="demo-palette">
+        <div class="swatch" style="background:#FF6B6B"></div>
+        <div class="swatch" style="background:#FFD93D"></div>
+        <div class="swatch" style="background:#6BCB77"></div>
+        <div class="swatch" style="background:#4D96FF"></div>
+      </section>
+    </main>
+
+    <script src="{% static 'js/pallate.js' %}"></script>
+  </body>
+  </html>
