@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,10 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PallettePartner{% endblock %}</title>
 
-    <!-- Load Tailwind from CDN -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Tailwind Custom Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -28,10 +27,14 @@
         }
     </script>
 
-    {% load static %}
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
 </head>
 <body class="bg-primary-dark text-text-light font-sans">
+
     {% block content %}{% endblock %}
+
+    <!-- Optional JS -->
+    <script src="{% static 'js/pallate.js' %}"></script>
 </body>
 </html>
