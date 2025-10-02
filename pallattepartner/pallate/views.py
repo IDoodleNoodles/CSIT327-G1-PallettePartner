@@ -1,10 +1,13 @@
 from django.shortcuts import render
 
+def landing(request):
+    return render(request, 'pallate/index.html')
 
-def index(request):
-	"""Render a simple home page for the pallate app."""
-	context = {
-		'title': 'Pallate — Collaboration Finder',
-		'message': 'Welcome to the Pallate demo app — find collaborators and share palettes.'
-	}
-	return render(request, 'pallate/index.html', context)
+def login_view(request):
+    return render(request, 'pallate/login.html')
+
+def register(request):
+    return render(request, 'pallate/register.html')
+
+def dashboard(request):
+    return render(request, 'pallate/dashboard.html')

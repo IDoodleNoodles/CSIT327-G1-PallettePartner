@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PallettePartner{% endblock %}</title>
+
+    <!-- Load Tailwind from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#0A0A1F',
+                        'accent-purple': '#8B5CF6',
+                        'accent-indigo': '#4F46E5',
+                        'text-light': '#F3F4F6',
+                        'card-dark': '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
+</head>
+<body class="bg-primary-dark text-text-light font-sans">
+    {% block content %}{% endblock %}
+</body>
+</html>
