@@ -1,24 +1,29 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
-  </head>
-  <body>
-    <main class="container">
-      <h1>{{ title }}</h1>
-      <p>{{ message }}</p>
+{% extends "base.html" %}
+{% block title %}Landing | PallettePartner{% endblock %}
+{% block content %}
+<header class="p-4 md:p-8 flex justify-between items-center max-w-7xl mx-auto">
+  <div class="flex items-center space-x-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.667c0 2.484 2.5 4.333 5 4.333 2.5 0 5-1.849 5-4.333" />
+    </svg>
+    <span class="text-xl font-bold text-text-light">PallettePartner</span>
+  </div>
+  <div class="space-x-3">
+    <a href="{% url 'login' %}" class="text-sm font-medium hover:text-accent-purple transition">Sign In</a>
+    <a href="{% url 'register' %}" class="text-sm font-semibold px-4 py-2 rounded-lg btn-gradient">Get Started</a>
+  </div>
+</header>
 
-      <section class="demo-palette">
-        <div class="swatch" style="background:#FF6B6B"></div>
-        <div class="swatch" style="background:#FFD93D"></div>
-        <div class="swatch" style="background:#6BCB77"></div>
-        <div class="swatch" style="background:#4D96FF"></div>
-      </section>
-    </main>
-
-    <script src="{% static 'js/pallate.js' %}"></script>
-  </body>
-  </html>
+<main class="text-center py-16 md:py-32 max-w-5xl mx-auto px-4">
+  <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+    Where <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-indigo to-accent-purple">Creative Minds</span> Unite
+  </h1>
+  <p class="text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+    Connect with artists, designers, and creators worldwide. Find your perfect collaboration partner and bring your vision to life.
+  </p>
+  <div class="space-x-4">
+    <a href="{% url 'register' %}" class="px-8 py-3 rounded-xl text-lg font-semibold text-text-light btn-gradient">Start Collaborating</a>
+    <a href="{% url 'dashboard' %}" class="px-8 py-3 rounded-xl text-lg font-semibold bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Browse Projects</a>
+  </div>
+</main>
+{% endblock %}
