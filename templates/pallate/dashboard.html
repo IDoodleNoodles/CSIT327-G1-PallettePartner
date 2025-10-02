@@ -1,37 +1,93 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | PallettePartner{% endblock %}
+
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-12">
-  <h1 class="text-4xl font-bold text-center mb-8">
-    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
-      Connect. Collaborate. Create.
-    </span>
-  </h1>
 
-  <p class="text-center text-gray-400 mb-12">
-    Find your perfect creative partner and bring amazing projects to life.
-    Join thousands of artists making magic together.
-  </p>
+<!-- Main Content -->
+<main class="main-content">
+    <div class="container">
 
-  <!-- Example Projects Section -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66"
-           class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h2 class="text-xl font-semibold">Comic Book Series - Artist Needed</h2>
-        <p class="text-gray-400 text-sm">Writer seeking artist for ongoing sci-fi comic series...</p>
-      </div>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 class="hero-title">
+                Connect. <span class="gradient-text">Collaborate</span>. Create.
+            </h1>
+            <p class="hero-subtitle">
+                Find your perfect creative partner and bring amazing projects to life.
+            </p>
+        </section>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-buttons">
+                <button class="btn-filter active">Trending</button>
+                <button class="btn-filter">Recent</button>
+                <button class="btn-filter">Featured</button>
+            </div>
+            <button class="btn-outline">More Filters</button>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Left: Cards -->
+            <div class="cards-section">
+                <div class="cards-grid">
+
+                    <!-- Collab Card -->
+                    <div class="collab-card">
+                        <div class="card-image-placeholder">
+                            <!-- I butang ang url or image -->
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Comic Book Series - Artist Needed</h3>
+                            <p class="card-description">Writer seeking artist for ongoing sci-fi comic series...</p>
+                            <div class="card-tags">
+                                <span class="tag">Comic Artist</span>
+                                <span class="tag">Inker</span>
+                                <span class="tag">Colorist</span>
+                            </div>
+                            <div class="card-footer">
+                                <div class="card-author">
+                                    <div class="author-avatar">LM</div>
+                                    <span class="author-name">Luna Martinez</span>
+                                </div>
+                                <div class="card-stats">
+                                    <span class="stat"><i class="fas fa-star text-accent-purple"></i> 4.9 · 47 projects</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right: Sidebar -->
+            <aside class="sidebar">
+                <div class="featured-box">
+                    <h3 class="featured-title"><i class="fas fa-palette text-accent-purple"></i> Featured Artists</h3>
+                    <div class="featured-artists">
+                        <div class="artist-card">
+                            <div class="artist-avatar">LM</div>
+                            <div class="artist-info">
+                                <h4 class="artist-name">Luna Martinez</h4>
+                                <p class="artist-specialty">Digital Illustration</p>
+                                <div class="artist-stats">
+                                    <span class="artist-rating"><i class="fas fa-star"></i> 4.9</span>
+                                    <span>47 projects</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-box">
+                    <h3 class="cta-title">Ready to Create?</h3>
+                    <p class="cta-text">Start your first collaboration project today!</p>
+                    <button class="btn btn-primary btn-full">Start a Project</button>
+                </div>
+            </aside>
+        </div>
     </div>
+</main>
 
-    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f"
-           class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h2 class="text-xl font-semibold">Mural Design for Coffee Shop</h2>
-        <p class="text-gray-400 text-sm">Looking for artist to paint a large mural with coffee theme...</p>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
