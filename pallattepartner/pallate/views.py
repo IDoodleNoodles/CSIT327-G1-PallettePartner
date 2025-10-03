@@ -11,3 +11,9 @@ def register(request):
 
 def dashboard(request):
     return render(request, 'pallate/dashboard.html')
+
+def artist_profile(request):
+    return render(request, "pallate/artist_profile.html")
+
+def collaboration_detail(request):
+    return render(request, "pallate/collaboration_detail.html")

@@ -12,6 +12,17 @@ function showView(viewId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Main initializer
+document.addEventListener('DOMContentLoaded', function () {
+    // Show landing page by default
     showView('LandingPage');
+
+    // Initialize interactive features
+    initializeNavigation();
+    initializeFeedFilters();
+    initializeCardInteractions();
+    initializePortfolioFilters();
+    initializeChat();
+    initializeTimeline();
+    initializeAnimations();
 });
