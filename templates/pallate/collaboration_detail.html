@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fantasy Book Cover Design | PallettePartner{% endblock %}
+
+{% block content %}
+<main class="collaboration-main p-6">
+    <div class="collaboration-container grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Panel - Project Details -->
+        <div class="project-details-panel lg:col-span-2 bg-card-dark p-6 rounded-2xl shadow-lg">
+            
+            <!-- Project Header -->
+            <div class="project-header mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img src="https://via.placeholder.com/40x40/4A90E2/FFFFFF?text=SJ" 
+                             alt="Sarah Johnson" 
+                             class="w-12 h-12 rounded-full">
+                        <div>
+                            <h3 class="font-semibold">Sarah Johnson</h3>
+                            <p class="text-sm text-gray-400">Project Owner</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="status-badge bg-green-600 px-2 py-1 rounded-lg text-sm">Active</span>
+                        <p class="text-xs text-gray-400">Posted 3 days ago</p>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold mt-4">Fantasy Book Cover Design</h1>
+                <div class="project-tags mt-2 space-x-2">
+                    <span class="tag bg-accent-purple">Illustration</span>
+                    <span class="tag bg-accent-indigo">Fantasy</span>
+                    <span class="tag bg-gray-700">Book Cover</span>
+                </div>
+            </div>
+
+            <!-- Project Description -->
+            <section class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Project Description</h2>
+                <p class="mb-3">I'm looking for a talented illustrator to create a stunning fantasy book cover for my upcoming novel <strong>"The Dragon's Legacy"</strong>. The cover should feature:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>A majestic dragon soaring over a mystical landscape</li>
+                    <li>A young protagonist (mage) in the foreground</li>
+                    <li>Dark, atmospheric lighting with magical elements</li>
+                    <li>Rich, vibrant colors that pop on bookstore shelves</li>
+                </ul>
+            </section>
+
+            <!-- Requirements -->
+            <section class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Project Requirements</h2>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>High-resolution artwork (300 DPI minimum)</li>
+                    <li>Multiple format versions (front cover, full wrap, ebook)</li>
+                    <li>Regular progress updates</li>
+                    <li>Commercial usage rights included</li>
+                </ul>
+            </section>
+
+            <!-- Roles Needed -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4">Roles Needed</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-800 rounded-lg">
+                        <div class="flex justify-between">
+                            <h4 class="font-semibold"><i class="fas fa-paint-brush"></i> Lead Illustrator</h4>
+                            <span class="text-green-500">Filled</span>
+                        </div>
+                        <p class="text-sm text-gray-400">Alex Chen — $2,800 • 3 weeks</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-800 rounded-lg">
+                        <div class="flex justify-between">
+                            <h4 class="font-semibold"><i class="fas fa-palette"></i> Color Specialist</h4>
+                            <span class="text-yellow-400">Open</span>
+                        </div>
+                        <p class="text-sm text-gray-400">$500 • 1 week</p>
+                        <button class="btn-primary mt-2">Apply</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Panel - Chat -->
+        <div class="collaboration-panel bg-card-dark p-6 rounded-2xl shadow-lg">
+            <h3 class="text-lg font-semibold mb-4">Project Discussion</h3>
+            <div class="chat-messages h-80 overflow-y-auto space-y-3 mb-4">
+                <div class="message">
+                    <p><strong>Sarah:</strong> Thanks for joining the project, Alex!</p>
+                </div>
+                <div class="message">
+                    <p><strong>Alex:</strong> Thinking of a cinematic dragon scene 🐉🔥</p>
+                </div>
+            </div>
+            <div class="message-input flex gap-2">
+                <input type="text" class="flex-1 p-2 rounded-lg text-black" placeholder="Type your message...">
+                <button class="btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

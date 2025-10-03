@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Artist Profile | PallettePartner{% endblock %}
+
+{% block content %}
+<!-- Artist Profile Header -->
+<section class="artist-header-section bg-card-dark py-12 px-6 rounded-xl shadow-md">
+    <div class="artist-profile flex items-center gap-6">
+        <img src="https://via.placeholder.com/120x120/4A90E2/FFFFFF?text=AC" 
+             alt="Alex Chen" 
+             class="rounded-full border-4 border-accent-purple shadow-lg">
+        <div class="profile-details text-text-light">
+            <h1 class="text-3xl font-bold">Alex Chen</h1>
+            <p class="text-accent-indigo">Digital Artist & Concept Designer</p>
+            <p class="flex items-center gap-2 text-gray-400 mt-1">
+                <i class="fas fa-map-marker-alt"></i> San Francisco, CA
+            </p>
+            <div class="profile-stats flex gap-6 mt-4">
+                <div><span class="text-2xl font-bold">1.2k</span><p class="text-sm text-gray-400">Followers</p></div>
+                <div><span class="text-2xl font-bold">847</span><p class="text-sm text-gray-400">Following</p></div>
+                <div><span class="text-2xl font-bold">24</span><p class="text-sm text-gray-400">Projects</p></div>
+                <div><span class="text-2xl font-bold">4.9</span><p class="text-sm text-gray-400">Rating</p></div>
+            </div>
+        </div>
+        <div class="ml-auto flex gap-3">
+            <button class="btn-primary bg-accent-purple px-4 py-2 rounded-lg hover:bg-accent-indigo">Follow</button>
+            <button class="btn-secondary border border-accent-purple px-4 py-2 rounded-lg hover:bg-accent-indigo">Message</button>
+            <button class="btn-icon text-gray-300 hover:text-accent-purple"><i class="fas fa-share"></i></button>
+        </div>
+    </div>
+</section>
+
+<!-- Main Profile Content -->
+<main class="profile-main grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+    <!-- Sidebar -->
+    <aside class="profile-sidebar bg-card-dark p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold mb-3">About</h3>
+        <p class="text-gray-300 mb-4">Passionate digital artist specializing in fantasy and sci-fi concept art...</p>
+        <ul class="space-y-2 text-gray-400 text-sm">
+            <li><i class="fas fa-map-marker-alt mr-2"></i> San Francisco, CA</li>
+            <li><i class="fas fa-calendar mr-2"></i> 8 years active</li>
+            <li><i class="fas fa-clock mr-2"></i> Available for projects</li>
+            <li><i class="fas fa-dollar-sign mr-2"></i> $50-150/hour</li>
+        </ul>
+
+        <h3 class="text-lg font-semibold mt-6 mb-3">Skills & Interests</h3>
+        <div class="flex flex-wrap gap-2">
+            <span class="tag bg-accent-purple text-white px-2 py-1 rounded">Digital Art</span>
+            <span class="tag bg-accent-indigo text-white px-2 py-1 rounded">Concept Art</span>
+            <span class="tag bg-card-dark border px-2 py-1 rounded">Character Design</span>
+            <span class="tag bg-card-dark border px-2 py-1 rounded">Environment</span>
+        </div>
+
+        <h3 class="text-lg font-semibold mt-6 mb-3">Recent Activity</h3>
+        <div class="space-y-2 text-sm text-gray-400">
+            <p><i class="fas fa-heart text-red-400 mr-2"></i>Liked "Fantasy Book Cover Design"</p>
+            <p><i class="fas fa-comment text-blue-400 mr-2"></i>Commented on "Urban Photography Series"</p>
+            <p><i class="fas fa-plus text-green-400 mr-2"></i>Joined "Short Film Animation"</p>
+        </div>
+    </aside>
+
+    <!-- Portfolio + Collaborations -->
+    <div class="profile-content md:col-span-2 space-y-10">
+        <section class="portfolio-section">
+            <h2 class="text-xl font-bold mb-4">Portfolio</h2>
+            <div class="portfolio-filters flex gap-3 mb-6">
+                <button class="filter-btn bg-accent-purple text-white px-3 py-1 rounded">All</button>
+                <button class="filter-btn bg-card-dark hover:bg-accent-indigo px-3 py-1 rounded">Character Design</button>
+                <button class="filter-btn bg-card-dark hover:bg-accent-indigo px-3 py-1 rounded">Environment</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <img src="https://via.placeholder.com/300x200/2C3E50/FFFFFF?text=Dragon+Rider" class="rounded-lg shadow-md">
+                <img src="https://via.placeholder.com/300x200/34495E/FFFFFF?text=Cyberpunk+City" class="rounded-lg shadow-md">
+                <img src="https://via.placeholder.com/300x200/8E44AD/FFFFFF?text=Space+Explorer" class="rounded-lg shadow-md">
+                <img src="https://via.placeholder.com/300x200/16A085/FFFFFF?text=Magical+Forest" class="rounded-lg shadow-md">
+                <img src="https://via.placeholder.com/300x200/E74C3C/FFFFFF?text=Robot+Warrior" class="rounded-lg shadow-md">
+                <img src="https://via.placeholder.com/300x200/F39C12/FFFFFF?text=Underwater+City" class="rounded-lg shadow-md">
+            </div>
+        </section>
+
+        <section class="collaborations-section">
+            <h2 class="text-xl font-bold mb-4">Active Collaborations</h2>
+            <div class="space-y-4">
+                <div class="collaboration-item bg-card-dark p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                        <h4 class="font-semibold text-white">Fantasy Book Cover Design</h4>
+                        <p class="text-sm text-gray-400">Character Designer • Sarah Johnson</p>
+                        <span class="status-badge bg-green-500 text-white text-xs px-2 py-1 rounded">In Progress</span>
+                    </div>
+                    <button class="btn-outline border border-accent-purple px-3 py-1 rounded hover:bg-accent-purple">View Project</button>
+                </div>
+                <div class="collaboration-item bg-card-dark p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                        <h4 class="font-semibold text-white">Short Film Animation</h4>
+                        <p class="text-sm text-gray-400">Concept Artist • Lisa Wang</p>
+                        <span class="status-badge bg-yellow-500 text-white text-xs px-2 py-1 rounded">Planning</span>
+                    </div>
+                    <button class="btn-outline border border-accent-purple px-3 py-1 rounded hover:bg-accent-purple">View Project</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
