@@ -12,24 +12,19 @@
 1. Clone repository and open the project folder:
    - Windows (PowerShell/CMD):
      - git clone <repo-url>
-     - cd "d:\Codes\IM2\dev\PallettePartner-Collaboration-Finder-for-Artists"
+     - go to the repository folder
 2. Create and activate virtual environment:
    - python -m venv venv
    - venv\Scripts\activate
 3. Install dependencies:
-   - If requirements.txt exists:
-     - pip install -r requirements.txt
-   - Otherwise:
-     - pip install Django
-4. Configure environment (optional):
-   - Copy example env or update config/settings.py for DB, SECRET_KEY, DEBUG
-5. Apply migrations:
+    - pip install Django
+4. Apply migrations:
    - python manage.py migrate
-6. (Optional) Create a superuser:
+5. (Optional) Create a superuser:
    - python manage.py createsuperuser
-7. Run development server:
+6. Run development server:
    - python manage.py runserver
-8. Open browser:
+7. Open browser:
    - http://127.0.0.1:8000
 
 ## The Team/Creators
