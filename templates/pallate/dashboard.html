@@ -22,9 +22,9 @@
             </div>
         </div>
         <div class="nav-menu flex items-center gap-6">
-            <a href="{% url 'landing' %}" class="nav-link hover:text-accent-indigo">Home</a>
-            <a href="{% url 'artist_profile' %}" class="nav-link hover:text-accent-indigo">Artists</a>
-            <a href="{% url 'collaboration_detail' %}" class="nav-link hover:text-accent-indigo">Collaborations</a>
+            <a href="{% url 'pallate:landing' %}" class="nav-link hover:text-accent-indigo">Home</a>
+            <a href="{% url 'pallate:artist_profile' %}" class="nav-link hover:text-accent-indigo">Artists</a>
+            <a href="{% url 'pallate:collaboration_detail' %}" class="nav-link hover:text-accent-indigo">Collaborations</a>
             <button class="btn-primary px-4 py-2 rounded-lg bg-accent-purple hover:bg-accent-indigo">Post a Collaboration</button>
             <div class="nav-icons flex gap-3">
                 <button class="nav-icon relative">
@@ -45,6 +45,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <div class="container">
         <!-- Hero Section -->
         <section class="hero text-center py-16 bg-card-dark">
             <div class="hero-content max-w-2xl mx-auto">
@@ -109,5 +110,6 @@
                 </div>
             </div>
         </section>
+        </div>
     </main>
 {% endblock %}
