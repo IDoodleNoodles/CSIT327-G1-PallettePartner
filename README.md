@@ -15,16 +15,15 @@
      - go to the repository folder
 2. Create and activate virtual environment:
    - python -m venv venv
-   - venv\Scripts\activate
+   - venv\Scripts\Activate.ps1
 3. Install dependencies:
     - pip install Django
+    - pip install psycopg2 dj-database-url python-dotenv
 4. Apply migrations:
    - python manage.py migrate
-5. (Optional) Create a superuser:
-   - python manage.py createsuperuser
-6. Run development server:
+5. Run development server:
    - python manage.py runserver
-7. Open browser:
+6. Open browser:
    - http://127.0.0.1:8000
 
 ## The Team/Creators
