@@ -19,6 +19,7 @@
 3. Install dependencies:
     - pip install Django
     - pip install psycopg2 dj-database-url python-dotenv
+    - rename .env.preconfig to .env
 4. Apply migrations:
    - python manage.py migrate
 5. Run development server:
