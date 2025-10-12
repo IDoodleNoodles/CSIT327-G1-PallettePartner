@@ -26,6 +26,7 @@ body {
 }
 
 .main-content {
+  margin-top: 6rem;
   padding: 6rem 2.5rem 3rem;
   min-height: 100vh;
 }

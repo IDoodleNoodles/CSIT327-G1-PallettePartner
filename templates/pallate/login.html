@@ -1,33 +1,33 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 {% block title %}Login | PallettePartner{% endblock %}
-{% block content %}
-<main class="main-content">
-  <div class="container">
-    <div class="max-w-md mx-auto mt-20 p-6 bg-card-dark rounded-xl shadow-lg">
-      <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-  {% if messages %}
-    <ul class="mb-4">
-      {% for msg in messages %}
-        <li class="text-sm text-red-400">{{ msg }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
 
-  <form method="post" action="{% url 'pallate:login' %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="mb-4">
-      {{ form.username.label_tag }}
-      {{ form.username }}
-      {{ form.username.errors }}
-    </div>
-    <div class="mb-6">
-      {{ form.password.label_tag }}
-      {{ form.password }}
-      {{ form.password.errors }}
-    </div>
-    <button type="submit" class="w-full py-2 rounded-lg font-semibold text-text-light btn-gradient">Login</button>
+{% block content %}
+<main class="flex items-center justify-center min-h-screen bg-primary-dark text-text-light">
+  <div class="w-full max-w-md p-8 bg-card-dark rounded-2xl shadow-xl">
+    <h2 class="text-3xl font-bold text-center mb-6">Welcome Back</h2>
+
+    {% if messages %}
+      <ul class="mb-4">
+        {% for msg in messages %}
+          <li class="text-sm text-red-400">{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <form method="post" action="{% url 'pallate:login' %}">
+      {% csrf_token %}
+      {{ form|crispy }}
+
+      <button type="submit"
+        class="w-full mt-4 py-2 font-semibold text-white rounded-lg bg-gradient-to-r from-accent-indigo to-accent-purple hover:opacity-90 transition">
+        Sign In
+      </button>
     </form>
+
+    <div class="mt-4 text-center text-sm text-gray-400">
+      Don’t have an account? 
+      <a href="{% url 'pallate:register' %}" class="text-accent-purple hover:underline">Sign up</a>
     </div>
   </div>
 </main>

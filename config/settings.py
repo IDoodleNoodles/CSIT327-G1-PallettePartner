@@ -20,8 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env at project root
 load_dotenv(BASE_DIR / '.env')
-
-
+DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASES = {
+    'default': dj_database_url.config(default=DATABASE_URL)
+}
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -37,12 +39,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'crispy_forms',
+    'crispy_tailwind',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
 ]
 
 MIDDLEWARE = [
@@ -74,7 +79,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -123,9 +127,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
+STATICFILES_DIRS = [ 
     BASE_DIR / "static",
 ]
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = "tailwind"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
