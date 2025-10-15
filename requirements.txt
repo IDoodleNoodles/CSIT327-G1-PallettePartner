@@ -1,0 +1,7 @@
+# Project dependencies pinned for reproducible installs
+Django==5.2.7
+django-crispy-forms==2.4
+crispy-tailwind==1.0.3
+psycopg2==2.9.10
+python-dotenv==1.1.1
+dj-database-url==3.0.1
