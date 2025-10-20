@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Favorites | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] flex flex-col">
+  <div class="flex items-center gap-2 px-6 py-4 border-b border-[#1E2639] bg-[#0D1426]">
+    <a href="{% url 'pallate:dashboard' %}">
+      <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5 hover:opacity-80 transition">
+    </a>
+    <h1 class="text-lg font-semibold text-[#A7F3D0]">My Favorites</h1>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+    {% if favorite_posts %}
+      {% for fav in favorite_posts %}
+      <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 hover:border-[#A7F3D0] transition">
+        <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ fav.collaboration.title }}</h3>
+        <p class="text-[#9CA3AF] mt-2">{{ fav.collaboration.description }}</p>
+        <div class="text-sm text-[#6B7280] mt-3 flex gap-4">
+          <span>👤 {{ fav.collaboration.user.username }}</span>
+          <span>🕒 {{ fav.collaboration.created_at|timesince }} ago</span>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] mx-6 shadow-inner">
+        You haven't added any favorites yet.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
