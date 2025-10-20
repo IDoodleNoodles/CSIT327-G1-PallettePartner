@@ -1,14 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm, CollaborationForm
-from .models import Collaboration
-from .models import Collaboration, Message, Notification
-from .models import Collaboration, Message
+from .forms import RegisterForm, CollaborationForm, ProfileForm, ArtworkForm, CommentForm
+from .models import Collaboration, Message, Notification, Artwork, Favorite, Comment
+
+
 
 
 # Landing Page
@@ -48,6 +46,18 @@ def register(request):
     return render(request, 'pallate/register.html', {'form': form})
 
 
+# Logout
+def logout_view(request):
+    logout(request)
+    messages.info(request, 'You have been logged out.')
+    return redirect('pallate:login')
+
+
+# Welcome Page
+def welcome(request):
+    return render(request, 'pallate/welcome.html')
+
+
 # Dashboard (Protected)
 @login_required(login_url='pallate:login')
 def dashboard(request):
@@ -70,35 +80,25 @@ def dashboard(request):
     })
 
 
-# Artist Profile (Protected)
+# Artist Profile
 @login_required(login_url='pallate:login')
 def artist_profile(request):
     return render(request, 'pallate/artist_profile.html')
 
 
-# Collaboration Detail (Protected)
+# Collaboration Detail
 @login_required(login_url='pallate:login')
 def collaboration_detail(request):
     return render(request, 'pallate/collaboration_detail.html')
 
 
-# Logout
-def logout_view(request):
-    logout(request)
-    messages.info(request, 'You have been logged out.')
-    return redirect('pallate:login')
-
-
-# Welcome Page after Registration
-def welcome(request):
-    return render(request, 'pallate/welcome.html')
-
-
-# Account Page (Protected)
+# Account Page
 @login_required(login_url='pallate:login')
 def account(request):
     return render(request, 'pallate/account.html')
 
+
+# Profile Page (View & Edit)
 @login_required
 def profile_view(request):
     profile = request.user.profile
@@ -109,24 +109,80 @@ def profile_view(request):
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
         profile.save()
+        messages.success(request, "Profile updated successfully!")
         return redirect('pallate:profile')
     return render(request, 'pallate/profile.html', {'profile': profile})
 
+
+# Edit Profile (Form-based)
+@login_required
+def edit_profile(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('pallate:profile')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'pallate/edit_profile.html', {'form': form})
+
+
+# Upload Artwork
+@login_required
+def upload_artwork(request):
+    if request.method == 'POST':
+        form = ArtworkForm(request.POST, request.FILES)
+        if form.is_valid():
+            artwork = form.save(commit=False)
+            artwork.user = request.user
+            artwork.save()
+            messages.success(request, "Artwork uploaded successfully!")
+            return redirect('pallate:dashboard')
+    else:
+        form = ArtworkForm()
+    return render(request, 'pallate/upload_artwork.html', {'form': form})
+
+
+# Favorites Page
+@login_required
+def favorites(request):
+    favorite_posts = Favorite.objects.filter(user=request.user).select_related('collaboration')
+
+    return render(request, 'pallate/favorites.html', {
+        'favorite_posts': favorite_posts
+    })
+
+# Toggle Favorite
+@login_required
+def toggle_favorite(request, artwork_id):
+    artwork = get_object_or_404(Artwork, id=artwork_id)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, artwork=artwork)
+    if not created:
+        favorite.delete()
+        messages.info(request, "Removed from favorites.")
+    else:
+        messages.success(request, "Added to favorites!")
+    return redirect('pallate:dashboard')
+
+
+# Collaboration Chat
 @login_required
 def collab_messages(request, pk):
     collaboration = get_object_or_404(Collaboration, pk=pk)
     messages_qs = Message.objects.filter(collaboration=collaboration).order_by('timestamp')
+    form = CommentForm()
 
     if request.method == 'POST':
-        text = request.POST.get('text')
-        if text:
-            # Create the message
-            new_message = Message.objects.create(
-                collaboration=collaboration,
-                sender=request.user,
-                text=text
-            )
-            # (but only if the sender isn’t the owner)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = collaboration
+            comment.user = request.user
+            comment.save()
+
+            # Notify the owner
             if request.user != collaboration.user:
                 Notification.objects.create(
                     user=collaboration.user,
@@ -137,5 +193,6 @@ def collab_messages(request, pk):
 
     return render(request, 'pallate/collab_messages.html', {
         'collaboration': collaboration,
-        'messages': messages_qs
+        'messages': messages_qs,
+        'form': form
     })
