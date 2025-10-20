@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Messages | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-[#0B1221] text-[#E5E7EB]">
+
+  <!-- Sidebar toggle for back -->
+  <aside class="w-20 bg-[#0D1426] flex flex-col items-center py-6 border-r border-[#1E2639]">
+    <a href="{% url 'pallate:dashboard' %}" class="hover:opacity-80 transition">
+      <img src="{% static 'icon/back_icon.png' %}" alt="Back" class="w-6 h-6">
+    </a>
+  </aside>
+
+  <!-- Chat Area -->
+  <div class="flex-1 flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between bg-[#0D1426] border-b border-[#1E2639] px-6 py-4">
+      <div>
+        <h2 class="text-xl font-bold text-[#A7F3D0]">{{ collaboration.title }}</h2>
+        <p class="text-sm text-[#9CA3AF]">by {{ collaboration.user.username }}</p>
+      </div>
+      <img src="{% static 'icon/message_icon.png' %}" class="w-6 h-6">
+    </header>
+
+    <!-- Messages Container -->
+    <div id="messageBox" class="flex-1 p-6 overflow-y-auto space-y-4 bg-[#0B1221]">
+      {% for message in messages %}
+      <div class="flex {% if message.sender == user %}justify-end{% endif %}">
+        <div class="max-w-md bg-[#1A2035] rounded-xl p-3 border border-[#232B46]">
+          <p class="text-[#E5E7EB]">{{ message.text }}</p>
+          <span class="block text-xs text-[#6B7280] mt-1">{{ message.sender.username }} • {{ message.timestamp|timesince }} ago</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-center text-[#6B7280]">No messages yet. Start a conversation!</p>
+      {% endfor %}
+    </div>
+
+    <!-- Message Input -->
+    <form method="POST" class="flex items-center bg-[#0D1426] border-t border-[#1E2639] px-6 py-4 gap-3">
+      {% csrf_token %}
+      <input type="text" name="text" placeholder="Type your message..." class="flex-1 bg-[#1A2035] text-[#E5E7EB] rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]">
+      <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 py-2 rounded-md font-semibold transition">
+        Send
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

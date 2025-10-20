@@ -14,10 +14,15 @@
                 extend: {
                     colors: {
                         'primary-dark': '#0A0A1F',
+                        'secondary-dark': '#0D1426',
+                        'card-dark': '#1A2035',
+                        'accent-green': '#A7F3D0',
+                        'accent-green-hover': '#7BE5B4',
                         'accent-purple': '#8B5CF6',
                         'accent-indigo': '#4F46E5',
-                        'text-light': '#F3F4F6',
-                        'card-dark': '#1F2937',
+                        'text-light': '#E5E7EB',
+                        'muted': '#9CA3AF',
+                        'border-dark': '#232B46',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -27,36 +32,23 @@
         }
     </script>
 
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
 </head>
-<body class="bg-primary-dark text-text-light font-sans">
 
-    <header class="navigation">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="{% url 'pallate:landing' %}" class="logo-text">PallettePartner</a>
-            </div>
-            <nav class="nav-links">
-                <a href="{% url 'pallate:dashboard' %}" class="nav-link">Dashboard</a>
-                <a href="{% url 'pallate:artist_profile' %}" class="nav-link">Artists</a>
-                <a href="{% url 'pallate:collaboration_detail' %}" class="nav-link">Collaborations</a>
-            </nav>
-            <div class="nav-actions">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'pallate:logout' %}" class="btn btn-ghost">Logout</a>
-                    <a href="#" class="btn btn-outline">My Profile</a>
-                {% else %}
-                    <a href="{% url 'pallate:login' %}" class="btn btn-ghost">Login</a>
-                    <a href="{% url 'pallate:register' %}" class="btn btn-primary">Sign up</a>
-                {% endif %}
-            </div>
-        </div>
-    </header>
+<body class="bg-primary-dark text-text-light font-sans min-h-screen flex flex-col">
 
-    {% block content %}{% endblock %}
+    <!-- Page Content -->
+    <main class="flex-1">
+        {% block content %}
+        {% endblock %}
+    </main>
 
-    <!-- Optional JS -->
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-muted border-t border-border-dark bg-secondary-dark">
+        © 2025 PallettePartner. All rights reserved.
+    </footer>
+
+    <!-- Custom JS -->
     <script src="{% static 'js/pallate.js' %}"></script>
 </body>
 </html>

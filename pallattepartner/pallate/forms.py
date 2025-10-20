@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Collaboration
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label="First Name")
@@ -30,6 +31,22 @@ class RegisterForm(UserCreationForm):
                 'placeholder': field.label,
             })
 
-        # Password field adjustments for readability
         self.fields['password1'].widget.attrs.update({'placeholder': 'Password'})
         self.fields['password2'].widget.attrs.update({'placeholder': 'Confirm Password'})
+
+
+class CollaborationForm(forms.ModelForm):
+    class Meta:
+        model = Collaboration
+        fields = ['title', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Project Title',
+                'class': 'input-field'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Describe your project...',
+                'class': 'textarea-field',
+                'rows': 4
+            })
+        }
