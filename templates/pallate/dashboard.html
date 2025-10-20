@@ -18,16 +18,26 @@
       <!-- Searchbar -->
       <div class="flex items-center w-1/2 bg-[#1A2035] rounded-md px-3 py-1.5 border border-[#232B46]">
         <img src="{% static 'icon/search_icon.png' %}" alt="Search" class="w-4 h-4 opacity-60 mr-2">
-        <input type="text" placeholder="Search projects, artists, skills..." class="bg-transparent text-sm w-full text-[#E5E7EB] placeholder-[#9CA3AF] focus:outline-none">
+        <input type="text" placeholder="Search projects, artists, or skills..." 
+               class="bg-transparent text-sm w-full text-[#E5E7EB] placeholder-[#9CA3AF] focus:outline-none">
       </div>
     </div>
 
     <!-- Right icons -->
-    <div class="flex items-center gap-4">
-      <button class="relative hover:opacity-80 transition">
-        <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5">
-        <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#4ADE80] rounded-full"></span>
-      </button>
+    <div class="flex items-center gap-4 relative">
+      <!-- Notifications dropdown -->
+      <div class="relative group">
+        <button class="relative hover:opacity-80 transition">
+          <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5">
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#4ADE80] rounded-full"></span>
+        </button>
+        <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-[#1A2035] border border-[#232B46] rounded-lg shadow-lg p-3 text-sm z-50">
+          <p class="text-[#A7F3D0] font-semibold mb-1">Notifications</p>
+          <p class="text-[#9CA3AF] text-xs">No new notifications</p>
+        </div>
+      </div>
+
+      <!-- Logout -->
       <form action="{% url 'pallate:logout' %}" method="post">
         {% csrf_token %}
         <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] font-semibold px-3 py-1.5 rounded-md text-sm transition">
@@ -40,15 +50,17 @@
   <div class="flex flex-1 overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="bg-[#0D1426] border-r border-[#1E2639] w-64 flex flex-col py-6 px-4 transition-all duration-500 ease-in-out overflow-y-auto shadow-lg">
+    <aside id="sidebar" 
+      class="bg-[#0D1426] border-r border-[#1E2639] w-64 flex flex-col py-6 px-4 transition-all duration-500 ease-in-out overflow-y-auto shadow-lg">
+      
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-[1.1rem] font-semibold text-[#A7F3D0] flex items-center gap-2">
           <img src="{% static 'icon/navigation_icon.png' %}" id="toggleSidebar" class="w-6 h-6 cursor-pointer hover:opacity-80 transition" alt="Menu">
           <span id="menuLabel">Menu</span>
         </h1>
-        <button id="backButton" class="text-gray-400 hover:text-[#A7F3D0] transition">
+        <a href="{% url 'pallate:landing' %}" class="text-gray-400 hover:text-[#A7F3D0] transition">
           <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5" alt="Back">
-        </button>
+        </a>
       </div>
 
       <nav class="flex flex-col space-y-3 font-medium text-[#9CA3AF]">
@@ -61,7 +73,7 @@
         <a href="{% url 'pallate:collaboration_detail' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
           <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5"> <span>Collaborations</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
+        <a href="{% url 'pallate:favorites' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
           <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5"> <span>Favorite</span>
         </a>
         <a href="{% url 'pallate:profile' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
@@ -74,10 +86,10 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto bg-[#0B1221] px-8 py-8">
+    <main class="flex-1 overflow-y-auto bg-[#0B1221] px-8 py-8 space-y-6">
       {% if posts %}
         {% for post in posts %}
-        <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 mb-6 hover:border-[#A7F3D0] transition-all duration-300">
+        <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 hover:border-[#A7F3D0] transition-all duration-300 shadow-sm">
           <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ post.title }}</h3>
           <p class="text-[#9CA3AF] mt-2">{{ post.description }}</p>
 
@@ -87,16 +99,19 @@
           </div>
 
           <!-- Action buttons -->
-          <div class="flex gap-4 mt-4">
+          <div class="flex gap-5 mt-4 items-center">
             <a href="{% url 'pallate:collab_messages' post.id %}" title="Message" class="hover:opacity-80 transition">
               <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5">
             </a>
             <a href="{% url 'pallate:artist_profile' %}?user={{ post.user.id }}" title="Artist Profile" class="hover:opacity-80 transition">
               <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5">
             </a>
-            <button title="Favorite" class="hover:opacity-80 transition">
+            <a href="{% url 'pallate:toggle_favorite' post.id %}" title="Favorite" class="hover:opacity-80 transition">
               <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5">
-            </button>
+            </a>
+            <a href="{% url 'pallate:send_collab_request' post.id %}" title="Request Collaboration" class="hover:opacity-80 transition">
+              <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5">
+            </a>
           </div>
         </div>
         {% endfor %}
