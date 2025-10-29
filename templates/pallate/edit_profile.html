@@ -2,14 +2,137 @@
 {% load static %}
 {% block title %}Edit Profile{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto bg-[#1A2035] text-[#E5E7EB] p-8 rounded-xl shadow-lg mt-10 border border-[#232B46]">
-  <h2 class="text-2xl font-bold text-[#A7F3D0] mb-6 text-center">Edit Profile</h2>
-  <form method="POST" enctype="multipart/form-data" class="space-y-5">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="text-right">
-      <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-5 py-2 rounded-lg font-semibold transition">Save Changes</button>
+<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] py-6">
+  <div class="max-w-5xl mx-auto px-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="{% url 'pallate:profile' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Profile
+      </a>
     </div>
-  </form>
+    
+    <h2 class="text-2xl font-bold text-[#A7F3D0] mb-6 text-center">Edit Profile</h2>
+    
+    <div class="bg-[#1A2035] rounded-xl shadow-lg p-6 border border-[#232B46]">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Grid Layout for form fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          
+          <!-- Username -->
+          <div>
+            <label for="id_username" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.username.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="id_email" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.email.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- First Name -->
+          <div>
+            <label for="id_first_name" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Last Name -->
+          <div>
+            <label for="id_last_name" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.last_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Art Type -->
+          <div>
+            <label for="id_art_type" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Art Type</label>
+            {{ form.art_type }}
+            {% if form.art_type.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.art_type.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Portfolio Link -->
+          <div>
+            <label for="id_portfolio" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Portfolio URL</label>
+            {{ form.portfolio }}
+            {% if form.portfolio.errors %}
+              <p class="text-red-400 text-xs mt-1">{{ form.portfolio.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Avatar (Full width) -->
+        <div class="mb-4">
+          <label for="id_avatar" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Profile Picture</label>
+          {{ form.avatar }}
+          {% if form.avatar.errors %}
+            <p class="text-red-400 text-xs mt-1">{{ form.avatar.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Bio (Full width) -->
+        <div class="mb-4">
+          <label for="id_bio" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Bio</label>
+          {{ form.bio }}
+          {% if form.bio.errors %}
+            <p class="text-red-400 text-xs mt-1">{{ form.bio.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Password Section (2 columns) -->
+        <div class="pt-4 border-t border-[#232B46] mb-4">
+          <h3 class="text-base font-semibold text-[#A7F3D0] mb-3">Change Password (Optional)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="id_password" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">New Password</label>
+              {{ form.password }}
+              <p class="text-gray-400 text-xs mt-1">{{ form.password.help_text }}</p>
+              {% if form.password.errors %}
+                <p class="text-red-400 text-xs mt-1">{{ form.password.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="id_password_confirm" class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Confirm Password</label>
+              {{ form.password_confirm }}
+              {% if form.password_confirm.errors %}
+                <p class="text-red-400 text-xs mt-1">{{ form.password_confirm.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Form-level errors -->
+        {% if form.non_field_errors %}
+          <div class="bg-red-900/20 border border-red-500 text-red-400 px-3 py-2 rounded text-xs mb-4">
+            {{ form.non_field_errors.0 }}
+          </div>
+        {% endif %}
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3">
+          <a href="{% url 'pallate:profile' %}" class="bg-gray-700 hover:bg-gray-600 text-[#E5E7EB] px-5 py-2 rounded-lg font-semibold transition text-sm">Cancel</a>
+          <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-5 py-2 rounded-lg font-semibold transition text-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

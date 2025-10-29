@@ -49,9 +49,11 @@
 
   <div class="flex flex-1 overflow-hidden">
 
+    <!-- Mobile Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
     <!-- Sidebar -->
-    <aside id="sidebar" 
-      class="bg-[#0D1426] border-r border-[#1E2639] w-64 flex flex-col py-6 px-4 transition-all duration-500 ease-in-out overflow-y-auto shadow-lg">
+    <aside id="sidebar" class="bg-[#0D1426] border-r border-[#1E2639] w-64 flex flex-col py-6 px-4 transition-all duration-500 ease-in-out overflow-y-auto shadow-lg fixed lg:relative h-full z-40 lg:z-auto">
       
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-[1.1rem] font-semibold text-[#A7F3D0] flex items-center gap-2">
@@ -65,61 +67,114 @@
 
       <nav class="flex flex-col space-y-3 font-medium text-[#9CA3AF]">
         <a href="{% url 'pallate:dashboard' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0] {% if request.path == '/dashboard/' %}bg-[#1A2035] text-[#A7F3D0]{% endif %}">
-          <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5"> <span>Home</span>
+          <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home"> <span>Home</span>
         </a>
-        <a href="{% url 'pallate:artist_profile' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5"> <span>Artists</span>
+        <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
+          <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artists"> <span>Artists</span>
         </a>
-        <a href="{% url 'pallate:collaboration_detail' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5"> <span>Collaborations</span>
+        <a href="{% url 'pallate:collaboration_detail_legacy' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
+          <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaborations"> <span>Collaborations</span>
+        </a>
+        <a href="{% url 'pallate:upload_artwork' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
+          <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Upload"> <span>Upload Artwork</span>
         </a>
         <a href="{% url 'pallate:favorites' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5"> <span>Favorite</span>
+          <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorites"> <span>Favorites</span>
         </a>
         <a href="{% url 'pallate:profile' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5"> <span>My Profile</span>
+          <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile"> <span>My Profile</span>
         </a>
         <a href="#" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5"> <span>Settings</span>
+          <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5" alt="Settings"> <span>Settings</span>
         </a>
       </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto bg-[#0B1221] px-8 py-8 space-y-6">
-      {% if posts %}
-        {% for post in posts %}
-        <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 hover:border-[#A7F3D0] transition-all duration-300 shadow-sm">
-          <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ post.title }}</h3>
-          <p class="text-[#9CA3AF] mt-2">{{ post.description }}</p>
+    <main class="flex-1 overflow-y-auto bg-[#0B1221] px-8 py-8 space-y-8">
+      
+      <!-- Artworks Section -->
+      <section>
+        <h2 class="text-2xl font-bold text-[#A7F3D0] mb-4">Recent Artworks</h2>
+        
+        {% if artworks %}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for artwork in artworks %}
+            <div class="bg-[#1A2035] border border-[#232B46] rounded-lg overflow-hidden hover:border-[#A7F3D0] transition-all duration-300 shadow-sm">
+              {% if artwork.image %}
+              <div class="relative group">
+                <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-48 object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+              </div>
+              {% endif %}
+              
+              <div class="p-4">
+                <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ artwork.title }}</h3>
+                <p class="text-[#9CA3AF] mt-2 text-sm line-clamp-2">{{ artwork.description }}</p>
 
-          <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
-            <span>👤 {{ post.user.username }}</span>
-            <span>🕒 {{ post.created_at|timesince }} ago</span>
-          </div>
+                <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
+                  <span>👤 {{ artwork.user.username }}</span>
+                  <span>🕒 {{ artwork.created_at|timesince }} ago</span>
+                </div>
 
-          <!-- Action buttons -->
-          <div class="flex gap-5 mt-4 items-center">
-            <a href="{% url 'pallate:collab_messages' post.id %}" title="Message" class="hover:opacity-80 transition">
-              <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5">
-            </a>
-            <a href="{% url 'pallate:artist_profile' %}?user={{ post.user.id }}" title="Artist Profile" class="hover:opacity-80 transition">
-              <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5">
-            </a>
-            <a href="{% url 'pallate:toggle_favorite' post.id %}" title="Favorite" class="hover:opacity-80 transition">
-              <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5">
-            </a>
-            <a href="{% url 'pallate:send_collab_request' post.id %}" title="Request Collaboration" class="hover:opacity-80 transition">
-              <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5">
-            </a>
+                <!-- Action buttons -->
+                <div class="flex gap-4 mt-4 items-center">
+                  <a href="{% url 'pallate:toggle_favorite' artwork.id %}" 
+                     title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}" 
+                     class="hover:scale-110 transition-transform">
+                    {% if artwork.id in user_favorites %}
+                      <span class="text-2xl">❤️</span>
+                    {% else %}
+                      <span class="text-2xl">🤍</span>
+                    {% endif %}
+                  </a>
+                  <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}" title="Artist Profile" class="hover:opacity-80 transition">
+                    <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
           </div>
-        </div>
-        {% endfor %}
-      {% else %}
-      <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] mx-6 shadow-inner">
-        No collaboration posts yet. Be the first to share your art!
-      </div>
-      {% endif %}
+        {% else %}
+          <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] shadow-inner">
+            No artworks yet. Be the first to upload your art!
+          </div>
+        {% endif %}
+      </section>
+
+      <!-- Collaboration Posts Section -->
+      <section>
+        <h2 class="text-2xl font-bold text-[#A7F3D0] mb-4">Collaboration Opportunities</h2>
+        
+        {% if posts %}
+          {% for post in posts %}
+          <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 hover:border-[#A7F3D0] transition-all duration-300 shadow-sm mb-4">
+            <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ post.title }}</h3>
+            <p class="text-[#9CA3AF] mt-2">{{ post.description }}</p>
+
+            <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
+              <span>👤 {{ post.user.username }}</span>
+              <span>🕒 {{ post.created_at|timesince }} ago</span>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-5 mt-4 items-center">
+              <a href="{% url 'pallate:collab_messages' post.id %}" title="Message" class="hover:opacity-80 transition">
+                <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5" alt="Message">
+              </a>
+              <a href="{% url 'pallate:artist_profile_by_id' post.user.id %}" title="Artist Profile" class="hover:opacity-80 transition">
+                <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] shadow-inner">
+            No collaboration posts yet. Be the first to share your ideas!
+          </div>
+        {% endif %}
+      </section>
     </main>
   </div>
 
@@ -146,6 +201,39 @@
 
 </div>
 
+<!-- Scroll to Top Button -->
+<button id="scrollToTop" 
+  class="fixed bottom-6 right-6 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"
+  title="Scroll to top">
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+  </svg>
+</button>
+
 <!-- External JS -->
 <script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/favorites.js' %}"></script>
+
+<!-- Scroll to Top Script -->
+<script>
+  const scrollToTopBtn = document.getElementById('scrollToTop');
+  const mainContent = document.querySelector('main');
+  
+  mainContent.addEventListener('scroll', function() {
+    if (mainContent.scrollTop > 300) {
+      scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+      scrollToTopBtn.classList.add('opacity-100');
+    } else {
+      scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+      scrollToTopBtn.classList.remove('opacity-100');
+    }
+  });
+  
+  scrollToTopBtn.addEventListener('click', function() {
+    mainContent.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+</script>
 {% endblock %}

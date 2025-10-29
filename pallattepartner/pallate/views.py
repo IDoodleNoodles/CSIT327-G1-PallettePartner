@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm, CollaborationForm, ProfileForm, ArtworkForm, CommentForm
-from .models import Collaboration, Message, Notification, Artwork, Favorite, Comment
+from .forms import RegisterForm, CollaborationForm, ProfileForm, ArtworkForm, MessageForm
+from .models import Collaboration, Message, Notification, Artwork, Favorite
 
 
 
@@ -62,6 +62,8 @@ def welcome(request):
 @login_required(login_url='pallate:login')
 def dashboard(request):
     posts = Collaboration.objects.all().order_by('-created_at')
+    artworks = Artwork.objects.all().order_by('-created_at')
+    user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
 
     if request.method == 'POST':
         form = CollaborationForm(request.POST)
@@ -76,20 +78,61 @@ def dashboard(request):
 
     return render(request, 'pallate/dashboard.html', {
         'form': form,
-        'posts': posts
+        'posts': posts,
+        'artworks': artworks,
+        'user_favorites': user_favorites,
     })
 
 
-# Artist Profile
+# Artist Profile (view another user's public profile)
 @login_required(login_url='pallate:login')
-def artist_profile(request):
-    return render(request, 'pallate/artist_profile.html')
+def artist_profile(request, user_id=None):
+    from django.contrib.auth.models import User
+    # Support both URL param and query string (?user=)
+    target_user_id = user_id or request.GET.get('user')
+    if not target_user_id:
+        # Fallback to self if no user specified
+        target_user = request.user
+    else:
+        target_user = get_object_or_404(User, pk=target_user_id)
+
+    # Fetch related data
+    artist_profile = getattr(target_user, 'profile', None)
+    artworks = Artwork.objects.filter(user=target_user).order_by('-created_at')
+    user_collaborations = Collaboration.objects.filter(user=target_user).order_by('-created_at')
+    # Current user's favorites to mark hearts
+    user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
+
+    context = {
+        'artist_user': target_user,
+        'artist_profile': artist_profile,
+        'artworks': artworks,
+        'user_collaborations': user_collaborations,
+        'user_favorites': user_favorites,
+    }
+    return render(request, 'pallate/artist_profile.html', context)
 
 
 # Collaboration Detail
 @login_required(login_url='pallate:login')
-def collaboration_detail(request):
-    return render(request, 'pallate/collaboration_detail.html')
+def collaboration_detail(request, pk=None):
+    # Support legacy route without pk by showing latest or redirecting
+    if pk is None:
+        collab = Collaboration.objects.order_by('-created_at').first()
+        if not collab:
+            messages.info(request, 'No collaboration found yet.')
+            return redirect('pallate:dashboard')
+    else:
+        collab = get_object_or_404(Collaboration, pk=pk)
+
+    owner = collab.user
+    owner_profile = getattr(owner, 'profile', None)
+    context = {
+        'collaboration': collab,
+        'owner': owner,
+        'owner_profile': owner_profile,
+    }
+    return render(request, 'pallate/collaboration_detail.html', context)
 
 
 # Account Page
@@ -98,20 +141,17 @@ def account(request):
     return render(request, 'pallate/account.html')
 
 
-# Profile Page (View & Edit)
+# Profile Page (View Only)
 @login_required
 def profile_view(request):
     profile = request.user.profile
-    if request.method == 'POST':
-        profile.art_type = request.POST.get('art_type')
-        profile.portfolio = request.POST.get('portfolio')
-        profile.bio = request.POST.get('bio')
-        if 'avatar' in request.FILES:
-            profile.avatar = request.FILES['avatar']
-        profile.save()
-        messages.success(request, "Profile updated successfully!")
-        return redirect('pallate:profile')
-    return render(request, 'pallate/profile.html', {'profile': profile})
+    user_artworks = Artwork.objects.filter(user=request.user).order_by('-created_at')
+    user_collaborations = Collaboration.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'pallate/profile.html', {
+        'profile': profile,
+        'user_artworks': user_artworks,
+        'user_collaborations': user_collaborations
+    })
 
 
 # Edit Profile (Form-based)
@@ -122,6 +162,13 @@ def edit_profile(request):
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            
+            # If password was changed, update the session to keep user logged in
+            password = form.cleaned_data.get('password')
+            if password:
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, request.user)
+            
             messages.success(request, "Profile updated successfully!")
             return redirect('pallate:profile')
     else:
@@ -148,7 +195,7 @@ def upload_artwork(request):
 # Favorites Page
 @login_required
 def favorites(request):
-    favorite_posts = Favorite.objects.filter(user=request.user).select_related('collaboration')
+    favorite_posts = Favorite.objects.filter(user=request.user).select_related('artwork')
 
     return render(request, 'pallate/favorites.html', {
         'favorite_posts': favorite_posts
@@ -157,13 +204,23 @@ def favorites(request):
 # Toggle Favorite
 @login_required
 def toggle_favorite(request, artwork_id):
+    from django.http import JsonResponse
+    
     artwork = get_object_or_404(Artwork, id=artwork_id)
     favorite, created = Favorite.objects.get_or_create(user=request.user, artwork=artwork)
+    
     if not created:
         favorite.delete()
+        favorited = False
         messages.info(request, "Removed from favorites.")
     else:
+        favorited = True
         messages.success(request, "Added to favorites!")
+    
+    # Return JSON for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'favorited': favorited})
+    
     return redirect('pallate:dashboard')
 
 
@@ -172,15 +229,14 @@ def toggle_favorite(request, artwork_id):
 def collab_messages(request, pk):
     collaboration = get_object_or_404(Collaboration, pk=pk)
     messages_qs = Message.objects.filter(collaboration=collaboration).order_by('timestamp')
-    form = CommentForm()
 
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        form = MessageForm(request.POST)
         if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = collaboration
-            comment.user = request.user
-            comment.save()
+            message = form.save(commit=False)
+            message.collaboration = collaboration
+            message.sender = request.user
+            message.save()
 
             # Notify the owner
             if request.user != collaboration.user:
@@ -189,10 +245,13 @@ def collab_messages(request, pk):
                     text=f"New message from {request.user.username} in '{collaboration.title}'"
                 )
 
+            messages.success(request, "Message sent!")
             return redirect('pallate:collab_messages', pk=pk)
+    else:
+        form = MessageForm()
 
     return render(request, 'pallate/collab_messages.html', {
         'collaboration': collaboration,
         'messages': messages_qs,
-        'form': form
+        'form': form,
     })

@@ -2,14 +2,94 @@
 {% load static %}
 {% block title %}Upload Artwork{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto bg-[#1A2035] text-[#E5E7EB] p-8 rounded-xl shadow-lg mt-10 border border-[#232B46]">
-  <h2 class="text-2xl font-bold text-[#A7F3D0] mb-6 text-center">Upload Your Artwork</h2>
+<div class="min-h-screen bg-[#0B1221] py-8 px-4">
+  <!-- Back Button -->
+  <div class="max-w-2xl mx-auto mb-4">
+    <a href="{% url 'pallate:dashboard' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Dashboard
+    </a>
+  </div>
+
+  <div class="max-w-2xl mx-auto bg-[#1A2035] text-[#E5E7EB] p-8 rounded-xl shadow-lg border border-[#232B46]">
+    <h2 class="text-2xl font-bold text-[#A7F3D0] mb-6 text-center">Upload Your Artwork</h2>
+    
+    <!-- Image Preview -->
+    <div id="imagePreview" class="hidden mb-6">
+      <div class="relative rounded-lg overflow-hidden border-2 border-[#A7F3D0] max-h-96">
+        <img id="previewImg" src="" alt="Preview" class="w-full h-auto object-contain">
+        <button type="button" id="removePreview" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <p class="text-sm text-[#9CA3AF] mt-2 text-center" id="fileName"></p>
+    </div>
+    
   <form method="POST" enctype="multipart/form-data" class="space-y-5">
     {% csrf_token %}
     {{ form.as_p }}
-    <div class="text-right">
-      <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-5 py-2 rounded-lg font-semibold transition">Upload</button>
+    <div class="flex gap-3 justify-end pt-4">
+      <a href="{% url 'pallate:dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-[#E5E7EB] px-5 py-2 rounded-lg font-semibold transition">
+        Cancel
+      </a>
+        <button type="submit" id="submitBtn" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-5 py-2 rounded-lg font-semibold transition">
+          <span id="submitText">Upload</span>
+          <span id="submitLoader" class="hidden">Uploading...</span>
+        </button>
     </div>
   </form>
+  </div>
 </div>
+
+<!-- Image Preview Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[type="file"][accept="image/*"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+    const removePreview = document.getElementById('removePreview');
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoader = document.getElementById('submitLoader');
+    
+    if (imageInput) {
+      imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreview.classList.remove('hidden');
+            fileName.textContent = file.name;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    
+    if (removePreview) {
+      removePreview.addEventListener('click', function() {
+        imageInput.value = '';
+        imagePreview.classList.add('hidden');
+        previewImg.src = '';
+        fileName.textContent = '';
+      });
+    }
+    
+    // Show loading state on submit
+    if (form) {
+      form.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitLoader.classList.remove('hidden');
+      });
+    }
+  });
+</script>
 {% endblock %}
