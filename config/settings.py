@@ -28,12 +28,13 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r4$z0y$w-_&)(ft$zy^e+y5)@&s9%63xuf50y3zwyy9ylnabql'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1', 'https://.onrender.com']
 
 
 # Application definition
