@@ -132,6 +132,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [ 
     BASE_DIR / "static",
 ]
+# Directory where `collectstatic` will gather static files for production.
+# Required by Django's collectstatic when using the staticfiles app on servers like Render.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
 
