@@ -4,24 +4,59 @@
 {% block title %}Messages | PallettePartner{% endblock %}
 {% block content %}
 <div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] flex flex-col">
-  <div class="flex items-center gap-2 px-4 py-3 border-b border-[#1E2639]">
-    <a href="{% url 'pallate:dashboard' %}"><img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5"></a>
-    <h1 class="font-semibold text-lg">Chat: {{ collaboration.title }}</h1>
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E2639] bg-[#0D1426] sticky top-0 z-10">
+    <a href="{% url 'pallate:dashboard' %}" class="hover:opacity-80 transition">
+      <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5" alt="Back">
+    </a>
+    <div class="flex-1">
+      <h1 class="font-semibold text-lg text-[#A7F3D0]">{{ collaboration.title }}</h1>
+      <p class="text-xs text-[#9CA3AF]">Collaboration Chat</p>
+    </div>
   </div>
 
-  <div class="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-    {% for msg in messages %}
-      <div class="p-3 rounded-lg {% if msg.sender == request.user %}bg-[#4F46E5] text-white self-end{% else %}bg-[#1A2035]{% endif %}">
-        <p class="text-sm">{{ msg.text }}</p>
-        <small class="text-gray-400">{{ msg.sender.username }} • {{ msg.timestamp|timesince }} ago</small>
+  <!-- Messages Area -->
+  <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+          <div class="p-3 rounded-lg max-w-md sm:max-w-lg {% if msg.sender == request.user %}bg-[#4F46E5] text-white{% else %}bg-[#1A2035]{% endif %} shadow-md">
+          <p class="text-xs font-semibold mb-1 {% if msg.sender == request.user %}text-[#A7F3D0]{% else %}text-[#7BE5B4]{% endif %}">
+            {{ msg.sender.username }}
+          </p>
+          <p class="text-sm">{{ msg.text }}</p>
+          <small class="text-xs {% if msg.sender == request.user %}text-gray-200{% else %}text-gray-400{% endif %}">{{ msg.timestamp|timesince }} ago</small>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-[#9CA3AF] py-8">
+        <p class="mb-2">💬 No messages yet</p>
+        <p class="text-sm">Start the conversation!</p>
       </div>
-    {% endfor %}
+    {% endif %}
   </div>
 
-  <form method="POST" class="flex items-center gap-3 p-4 bg-[#0D1426] border-t border-[#1E2639]">
+  <!-- Message Input Form -->
+  <form method="POST" class="p-4 bg-[#0D1426] border-t border-[#1E2639]">
     {% csrf_token %}
-    <input type="text" name="text" placeholder="Type a message..." class="flex-1 bg-[#1A2035] rounded-md px-4 py-2 text-sm text-gray-200 focus:ring focus:ring-[#4F46E5] outline-none">
-    <button type="submit" class="bg-[#4F46E5] px-4 py-2 rounded-md text-white">Send</button>
+    <div class="flex items-end gap-3">
+      {{ form.text }}
+      <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] px-4 sm:px-6 py-2 rounded-lg text-[#0A0A1F] font-semibold transition whitespace-nowrap">
+        <span class="hidden sm:inline">Send</span>
+        <span class="sm:hidden">📤</span>
+      </button>
+    </div>
   </form>
 </div>
+
+<!-- Auto-scroll to bottom script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('messages-container');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  });
+</script>
 {% endblock %}

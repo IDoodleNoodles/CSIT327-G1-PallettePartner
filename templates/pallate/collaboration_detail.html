@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Fantasy Book Cover Design | PallettePartner{% endblock %}
+{% block title %}{{ collaboration.title|default:'Collaboration' }} | PallettePartner{% endblock %}
 
 {% block content %}
 <main class="bg-primary-dark min-h-screen pt-24 pb-12 px-6 text-text-light">
@@ -20,29 +20,23 @@
       <!-- Project Header -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-          
-          <!-- 🖼️ PLACE PROJECT OWNER AVATAR HERE LATER -->
-          <!-- Example:
-          <img src="{% static 'images/avatars/sarah.png' %}" 
-               alt="Sarah Johnson" 
-               class="w-12 h-12 rounded-full border border-gray-600 shadow-sm">
-          -->
-          <img src="https://via.placeholder.com/40x40/4A90E2/FFFFFF?text=SJ" 
-               alt="Sarah Johnson" 
-               class="w-12 h-12 rounded-full border border-gray-700 shadow-sm">
-          
+          {% if owner_profile and owner_profile.avatar %}
+            <img src="{{ owner_profile.avatar.url }}" alt="{{ owner.username }}" class="w-12 h-12 rounded-full border border-gray-700 shadow-sm object-cover">
+          {% else %}
+            <img src="{% static 'icon/profile_icon.png' %}" alt="Owner" class="w-12 h-12 rounded-full border border-gray-700 shadow-sm p-1 bg-[#0D1426]">
+          {% endif %}
           <div>
-            <h3 class="font-semibold text-text-light">Sarah Johnson</h3>
+            <h3 class="font-semibold text-text-light">{{ owner.get_full_name|default:owner.username }}</h3>
             <p class="text-sm text-gray-400">Project Owner</p>
           </div>
         </div>
         <div class="text-right">
           <span class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm shadow-sm">Active</span>
-          <p class="text-xs text-gray-400">Posted 3 days ago</p>
+          <p class="text-xs text-gray-400">Posted {{ collaboration.created_at|timesince }} ago</p>
         </div>
       </div>
 
-      <h1 class="text-3xl font-bold mb-4">Fantasy Book Cover Design</h1>
+      <h1 class="text-3xl font-bold mb-4">{{ collaboration.title }}</h1>
       
       <!-- Tags -->
       <div class="flex flex-wrap gap-2 mb-6">
@@ -54,16 +48,7 @@
       <!-- Project Description -->
       <section class="mb-6">
         <h2 class="text-xl font-semibold mb-2 text-text-light">Project Description</h2>
-        <p class="text-gray-300 leading-relaxed mb-3">
-          I'm looking for a talented illustrator to create a stunning fantasy book cover for my upcoming novel 
-          <span class="text-indigo-400 font-semibold">"The Dragon's Legacy"</span>. The cover should feature:
-        </p>
-        <ul class="list-disc list-inside text-gray-300 space-y-1">
-          <li>A majestic dragon soaring over a mystical landscape</li>
-          <li>A young protagonist (mage) in the foreground</li>
-          <li>Dark, atmospheric lighting with magical elements</li>
-          <li>Rich, vibrant colors that pop on bookstore shelves</li>
-        </ul>
+        <p class="text-gray-300 leading-relaxed">{{ collaboration.description }}</p>
       </section>
 
       <!-- Requirements -->
@@ -110,31 +95,11 @@
     <!-- RIGHT PANEL: Chat -->
     <div class="bg-[#1E2433] p-6 rounded-2xl shadow-lg border border-gray-700 flex flex-col">
       <h3 class="text-lg font-semibold mb-4 text-text-light">Project Discussion</h3>
-      
-      <!-- Chat Messages -->
-      <div class="flex-1 overflow-y-auto space-y-3 mb-4">
-        <div class="bg-indigo-900 bg-opacity-40 px-4 py-3 rounded-xl max-w-[85%] border border-indigo-800 shadow-sm">
-          <p class="font-semibold text-indigo-300">Sarah</p>
-          <p class="text-gray-200">Thanks for joining the project, Alex!</p>
-        </div>
-        <div class="bg-gray-800 px-4 py-3 rounded-xl ml-auto max-w-[85%] border border-gray-700 shadow-sm">
-          <p class="font-semibold text-purple-300 text-right">Alex</p>
-          <p class="text-gray-200 text-right">Thinking of a cinematic dragon scene 🐉🔥</p>
-        </div>
-      </div>
-
-      <!-- Chat Input -->
-      <form class="flex items-center space-x-2 mt-auto">
-        <input 
-          type="text" 
-          placeholder="Type your message..." 
-          class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-accent-purple outline-none text-text-light placeholder-gray-500">
-        <button 
-          type="submit"
-          class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-lg font-semibold hover:opacity-90 transition shadow-md">
-          Send
-        </button>
-      </form>
+      <a href="{% url 'pallate:collab_messages' collaboration.id %}"
+         class="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] rounded-lg font-semibold transition">
+        Open Messages
+      </a>
+      <p class="text-gray-300">Use the message view to chat in real time.</p>
     </div>
   </div>
 </main>
