@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Comments | {{ artwork.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#050819] text-[#E5E7EB] flex flex-col items-center py-10 px-4">
+
+  <div class="w-full max-w-3xl bg-[#050819] border border-[#1F2937] rounded-2xl p-6 shadow-xl">
+    <a href="{% url 'pallate:dashboard' %}" class="text-sm text-[#9CA3AF] hover:text-white">&larr; Back to Dashboard</a>
+
+    <div class="mt-4 flex gap-4">
+      <div class="flex-1">
+        <p class="text-xs text-[#9CA3AF] mb-1">Project Title</p>
+        <h1 class="text-xl font-semibold">{{ artwork.title }}</h1>
+        <p class="text-sm text-[#9CA3AF] mt-1">{{ artwork.description }}</p>
+        <p class="mt-2 text-xs text-[#6B7280]">
+          By {{ artwork.user.username }} • {{ artwork.created_at|timesince }} ago
+        </p>
+      </div>
+      <div class="w-40 h-28 rounded-xl bg-[#111827] flex items-center justify-center overflow-hidden">
+        {% if artwork.image %}
+          <img src="{{ artwork.image.url }}" class="w-full h-full object-cover" alt="{{ artwork.title }}">
+        {% else %}
+          <span class="text-xs text-[#6B7280]">Image here</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-5 border-[#1F2937]">
+
+    <h2 class="text-lg font-semibold mb-3">Comments ({{ comments|length }})</h2>
+
+    <div class="space-y-4 mb-6 max-h-72 overflow-y-auto pr-2">
+      {% if comments %}
+        {% for comment in comments %}
+        <div class="bg-[#020617] border border-[#1F2937] rounded-xl px-4 py-3">
+          <p class="text-sm font-medium">{{ comment.user.username }}</p>
+          <p class="text-xs text-[#9CA3AF]">{{ comment.created_at|timesince }} ago</p>
+          <p class="mt-2 text-sm">{{ comment.text }}</p>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-sm text-[#9CA3AF]">No comments yet. Be the first to share your thoughts.</p>
+      {% endif %}
+    </div>
+
+    <h3 class="text-md font-semibold mb-2">Add a comment</h3>
+    <form method="post" class="space-y-3">
+      {% csrf_token %}
+      {{ form.text }}
+      <button type="submit"
+              class="px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] rounded-lg text-sm font-semibold">
+        Post Comment
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
