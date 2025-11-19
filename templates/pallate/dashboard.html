@@ -4,162 +4,247 @@
 {% block title %}Dashboard | PallettePartner{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex flex-col bg-[#0B1221] text-[#E5E7EB]">
+<div class="h-screen flex bg-[#050819] text-[#E5E7EB] overflow-hidden">
 
-  <!-- Navbar -->
-  <header class="flex items-center justify-between bg-[#0D1426] border-b border-[#1E2639] h-14 px-6 sticky top-0 z-50 shadow-md">
-    <div class="flex items-center gap-5 w-full">
-      <!-- Logo -->
-      <div class="flex items-center gap-2 font-bold text-lg">
-        <img src="{% static 'icon/dashboard.png' %}" alt="Logo" class="w-6 h-6">
-        <span class="bg-gradient-to-r from-[#4F46E5] to-[#8B5CF6] bg-clip-text text-transparent">PallettePartner</span>
-      </div>
+  <!-- Mobile Overlay -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
 
-      <!-- Searchbar -->
-      <div class="flex items-center w-1/2 bg-[#1A2035] rounded-md px-3 py-1.5 border border-[#232B46]">
-        <img src="{% static 'icon/search_icon.png' %}" alt="Search" class="w-4 h-4 opacity-60 mr-2">
-        <input type="text" placeholder="Search projects, artists, or skills..." 
-               class="bg-transparent text-sm w-full text-[#E5E7EB] placeholder-[#9CA3AF] focus:outline-none">
-      </div>
+  <!-- LEFT MENU -->
+  <aside id="sidebar"
+         class="bg-[#050819] w-64 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl h-full z-40 lg:relative">
+
+    <h1 class="text-base font-semibold text-white flex items-center gap-2 mb-8">
+      <span>Menu</span>
+    </h1>
+
+    <nav class="flex flex-col gap-3 text-sm font-medium text-[#CBD5F5]">
+
+      <a href="{% url 'pallate:dashboard' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg
+                {% if request.path == '/dashboard/' %}bg-[#12172D] text-white{% else %}hover:bg-[#12172D] hover:text-white{% endif %}">
+        <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artists">
+        <span>Artist</span>
+      </a>
+
+      <a href="{% url 'pallate:collaboration_detail_legacy' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaboration">
+        <span>Collaboration</span>
+      </a>
+
+      <a href="{% url 'pallate:upload_artwork' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Upload">
+        <span>Upload Artworks</span>
+      </a>
+
+      <a href="{% url 'pallate:favorites' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorites">
+        <span>Favorites</span>
+      </a>
+
+      <a href="{% url 'pallate:profile' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
+        <span>My Profile</span>
+      </a>
+    </nav>
+
+    <div class="mt-auto pt-8 border-t border-[#111827]">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white text-sm">
+        <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5" alt="Settings">
+        <span>Settings</span>
+      </a>
     </div>
+  </aside>
 
-    <!-- Right icons -->
-    <div class="flex items-center gap-4 relative">
-      <!-- Notifications dropdown -->
-      <div class="relative group">
-        <button class="relative hover:opacity-80 transition">
-          <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5">
-          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#4ADE80] rounded-full"></span>
-        </button>
-        <div class="hidden group-hover:flex flex-col absolute right-0 mt-2 w-56 bg-[#1A2035] border border-[#232B46] rounded-lg shadow-lg p-3 text-sm z-50">
-          <p class="text-[#A7F3D0] font-semibold mb-1">Notifications</p>
-          <p class="text-[#9CA3AF] text-xs">No new notifications</p>
+  <!-- RIGHT CONTENT AREA (scroll container) -->
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto relative">
+
+    <!-- TOP NAV BAR -->
+    <header class="flex items-center justify-between px-10 py-4 bg-[#050819] sticky top-0 z-20">
+      <div class="flex items-center gap-10 w-full">
+        <div class="text-xl font-semibold text-white">
+          <span class="text-white">Palette</span><span class="text-[#8B5CF6]">Partners</span>
+        </div>
+
+        <div class="flex items-center w-full max-w-xl bg-white rounded-md px-4 py-2 shadow">
+          <img src="{% static 'icon/search_icon.png' %}"
+               class="w-4 h-4 opacity-60 mr-2" alt="">
+          <input type="text" placeholder="Search projects, artist"
+                 class="bg-transparent text-sm w-full text-[#111827] placeholder-[#9CA3AF] focus:outline-none">
         </div>
       </div>
 
-      <!-- Logout -->
-      <form action="{% url 'pallate:logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] font-semibold px-3 py-1.5 rounded-md text-sm transition">
-          Logout
+      <div class="flex items-center gap-4 ml-6">
+        <button class="relative hover:opacity-80 transition">
+          <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5" alt="Notifications">
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#4ADE80] rounded-full"></span>
         </button>
-      </form>
-    </div>
-  </header>
 
-  <div class="flex flex-1 overflow-hidden">
+        <form action="{% url 'pallate:logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit"
+                  class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition">
+            Logout
+          </button>
+        </form>
+      </div>
+    </header>
 
-    <!-- Mobile Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    <!-- HERO BANNER -->
+    <section class="relative px-10 pt-4">
+      <div class="relative w-full h-56 rounded-t-3xl overflow-hidden">
+        <img src="{% static 'icon/dashboard_banner.jpg' %}" onerror="this.style.display='none'"
+             class="w-full h-full object-cover" alt="Banner">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="bg-[#0D1426] border-r border-[#1E2639] w-64 flex flex-col py-6 px-4 transition-all duration-500 ease-in-out overflow-y-auto shadow-lg fixed lg:relative h-full z-40 lg:z-auto">
-      
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-[1.1rem] font-semibold text-[#A7F3D0] flex items-center gap-2">
-          <img src="{% static 'icon/navigation_icon.png' %}" id="toggleSidebar" class="w-6 h-6 cursor-pointer hover:opacity-80 transition" alt="Menu">
-          <span id="menuLabel">Menu</span>
-        </h1>
-        <a href="{% url 'pallate:landing' %}" class="text-gray-400 hover:text-[#A7F3D0] transition">
-          <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5" alt="Back">
-        </a>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#050819]/90 via-[#050819]/40 to-transparent flex flex-col justify-center px-10">
+          <h1 class="text-2xl md:text-3xl font-bold text-red-200 mb-2">
+            Hola, {{ request.user.first_name|default:request.user.username }}!
+          </h1>
+        </div>
       </div>
 
-      <nav class="flex flex-col space-y-3 font-medium text-[#9CA3AF]">
-        <a href="{% url 'pallate:dashboard' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0] {% if request.path == '/dashboard/' %}bg-[#1A2035] text-[#A7F3D0]{% endif %}">
-          <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home"> <span>Home</span>
-        </a>
-        <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artists"> <span>Artists</span>
-        </a>
-        <a href="{% url 'pallate:collaboration_detail_legacy' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaborations"> <span>Collaborations</span>
-        </a>
-        <a href="{% url 'pallate:upload_artwork' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Upload"> <span>Upload Artwork</span>
-        </a>
-        <a href="{% url 'pallate:favorites' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorites"> <span>Favorites</span>
-        </a>
-        <a href="{% url 'pallate:profile' %}" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile"> <span>My Profile</span>
-        </a>
-        <a href="#" class="nav-item flex items-center gap-3 p-2 rounded-md hover:bg-[#1A2035] hover:text-[#A7F3D0]">
-          <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5" alt="Settings"> <span>Settings</span>
-        </a>
-      </nav>
-    </aside>
+      <!-- RECENT UPLOADS PILL -->
+      <div class="absolute left-10 top-[10.5rem]">
+        <div class="inline-flex bg-white rounded-full shadow px-5 py-1.5 text-sm font-semibold text-[#E53E3E]">
+          Recent Uploads
+        </div>
+      </div>
+    </section>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto bg-[#0B1221] px-8 py-8 space-y-8">
-      
-      <!-- Artworks Section -->
-      <section>
-        <h2 class="text-2xl font-bold text-[#A7F3D0] mb-4">Recent Artworks</h2>
-        
-        {% if artworks %}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for artwork in artworks %}
-            <div class="bg-[#1A2035] border border-[#232B46] rounded-lg overflow-hidden hover:border-[#A7F3D0] transition-all duration-300 shadow-sm">
-              {% if artwork.image %}
-              <div class="relative group">
-                <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-48 object-cover">
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
-              </div>
-              {% endif %}
-              
-              <div class="p-4">
-                <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ artwork.title }}</h3>
-                <p class="text-[#9CA3AF] mt-2 text-sm line-clamp-2">{{ artwork.description }}</p>
+    <!-- MAIN CARDS ROW -->
+    <section class="px-10 pb-10 pt-10 bg-[#050819]">
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,_2.4fr)_minmax(260px,_1fr)]">
 
-                <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
-                  <span>👤 {{ artwork.user.username }}</span>
-                  <span>🕒 {{ artwork.created_at|timesince }} ago</span>
+        <!-- RECENT UPLOADS -->
+        <div class="bg-[#050819] rounded-3xl shadow-2xl border border-[#1F2937] px-6 py-6">
+          {% if artworks %}
+            <div class="flex flex-col gap-4">
+              {% for artwork in artworks %}
+              <div class="grid md:grid-cols-[minmax(0,_1.4fr)_minmax(220px,_1fr)] gap-4 bg-[#FFFFFF] rounded-3xl p-4 shadow">
+                <!-- LEFT TEXT AREA -->
+                <div class="flex flex-col justify-between text-[#111827]">
+                  <div>
+                    <p class="text-xs text-[#9CA3AF] mb-1">Project Title</p>
+                    <h3 class="text-base font-semibold">{{ artwork.title }}</h3>
+                    <p class="text-xs text-[#6B7280] mt-1 line-clamp-2">
+                      {{ artwork.description }}
+                    </p>
+                  </div>
+
+                  <div class="mt-3 text-[11px] text-[#9CA3AF]">
+                    {{ artwork.created_at|timesince }} ago
+                  </div>
+
+                  <!-- ICON ROW (artist / favorite / comments) -->
+                  <div class="mt-3 flex items-center gap-4">
+                    <!-- artist icon -->
+                    <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
+                       class="hover:opacity-80 transition" title="Artist Profile">
+                      <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+                    </a>
+
+                    <!-- favorite -->
+                    <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
+                       title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
+                       class="hover:opacity-80 transition">
+                      {% if artwork.id in user_favorites %}
+                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorite">
+                      {% else %}
+                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5 opacity-40" alt="Favorite">
+                      {% endif %}
+                    </a>
+
+                    <!-- comments (icon + count) => opens floating panel -->
+                    <button type="button"
+                            class="open-comments hover:opacity-80 transition flex items-center gap-1"
+                            data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
+                            title="View comments">
+                      <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5" alt="Comments">
+                      <span class="text-[11px] text-[#6B7280]">
+                        {{ artwork.comment_count|default:0 }}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
-                <!-- Action buttons -->
-                <div class="flex gap-4 mt-4 items-center">
-                  <a href="{% url 'pallate:toggle_favorite' artwork.id %}" 
-                     title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}" 
-                     class="hover:scale-110 transition-transform">
-                    {% if artwork.id in user_favorites %}
-                      <span class="text-2xl">❤️</span>
-                    {% else %}
-                      <span class="text-2xl">🤍</span>
-                    {% endif %}
-                  </a>
-                  <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}" title="Artist Profile" class="hover:opacity-80 transition">
-                    <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
-                  </a>
+                <!-- RIGHT IMAGE AREA -->
+                <div class="rounded-2xl bg-[#E5E7EB] flex items-center justify-center overflow-hidden">
+                  {% if artwork.image %}
+                    <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
+                         class="w-full h-40 md:h-full object-cover">
+                  {% else %}
+                    <span class="text-sm text-[#6B7280]">Image here</span>
+                  {% endif %}
                 </div>
               </div>
+              {% endfor %}
             </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] shadow-inner">
-            No artworks yet. Be the first to upload your art!
-          </div>
-        {% endif %}
-      </section>
+          {% else %}
+            <div class="text-center text-[#9CA3AF] text-sm border border-dashed border-[#374151] rounded-2xl py-10 bg-[#050819]">
+              No artworks yet. Be the first to upload your art!
+            </div>
+          {% endif %}
+        </div>
 
-      <!-- Collaboration Posts Section -->
-      <section>
-        <h2 class="text-2xl font-bold text-[#A7F3D0] mb-4">Collaboration Opportunities</h2>
-        
+        <!-- ACTIVE ARTIST PANEL -->
+        <aside class="bg-[#050819] rounded-3xl shadow-2xl border border-[#1F2937] px-5 py-6">
+          <h2 class="text-base font-semibold text-[#C4B5FD] mb-4">Active Artist</h2>
+
+          {% if posts %}
+            <div class="flex flex-col gap-3">
+              {% for post in posts|slice:":5" %}
+              <div class="flex items-center justify-between bg-white rounded-2xl px-4 py-3 shadow">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#E5E7EB] flex items-center justify-center text-xs font-semibold text-[#4B5563]">
+                    {{ post.user.username|first|upper }}
+                  </div>
+                  <div class="text-[#111827]">
+                    <p class="text-sm font-medium">{{ post.user.username }}</p>
+                    <p class="text-[11px] text-[#9CA3AF]">
+                      {{ post.created_at|timesince }} ago
+                    </p>
+                  </div>
+                </div>
+                <a href="{% url 'pallate:collab_messages' post.id %}"
+                   class="w-9 h-9 flex items-center justify-center rounded-full bg-[#F3F4F6] hover:bg-[#E5E7EB] transition"
+                   title="Message">
+                  <img src="{% static 'icon/message_icon.png' %}" class="w-4 h-4" alt="Message">
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center text-[#9CA3AF] text-sm border border-dashed border-[#374151] rounded-2xl py-6 bg-[#050819]">
+              No active artists yet.
+            </div>
+          {% endif %}
+        </aside>
+      </div>
+
+      <!-- COLLABORATION LIST (optional) -->
+      <section class="mt-10">
+        <h2 class="text-xl font-bold text-white mb-4">Collaboration Opportunities</h2>
         {% if posts %}
           {% for post in posts %}
-          <div class="bg-[#1A2035] border border-[#232B46] rounded-lg p-5 hover:border-[#A7F3D0] transition-all duration-300 shadow-sm mb-4">
-            <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ post.title }}</h3>
-            <p class="text-[#9CA3AF] mt-2">{{ post.description }}</p>
+          <div class="bg-[#050819] border border-[#1F2937] rounded-2xl p-5 mb-4 shadow hover:border-[#8B5CF6] transition">
+            <h3 class="text-lg font-semibold text-white">{{ post.title }}</h3>
+            <p class="text-sm text-[#9CA3AF] mt-2">{{ post.description }}</p>
 
-            <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
+            <div class="text-xs text-[#6B7280] mt-3 flex gap-4 items-center">
               <span>👤 {{ post.user.username }}</span>
               <span>🕒 {{ post.created_at|timesince }} ago</span>
             </div>
 
-            <!-- Action buttons -->
-            <div class="flex gap-5 mt-4 items-center">
+            <div class="flex gap-4 mt-4 items-center">
               <a href="{% url 'pallate:collab_messages' post.id %}" title="Message" class="hover:opacity-80 transition">
                 <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5" alt="Message">
               </a>
@@ -170,70 +255,73 @@
           </div>
           {% endfor %}
         {% else %}
-          <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] shadow-inner">
+          <div class="text-center text-[#9CA3AF] text-sm border border-[#1F2937] rounded-xl py-10 bg-[#050819] shadow-inner">
             No collaboration posts yet. Be the first to share your ideas!
           </div>
         {% endif %}
       </section>
-    </main>
-  </div>
+    </section>
 
-  <!-- Floating Create Button -->
-  <button id="addPostBtn" class="fixed bottom-8 right-8 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] text-3xl font-bold rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-300">+</button>
+    <!-- FLOATING CREATE BUTTON -->
+    <button id="addPostBtn"
+            class="fixed bottom-8 right-8 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] text-3xl font-bold rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-300 z-40">
+      +
+    </button>
 
-  <!-- Overlay -->
-  <div id="overlay" class="overlay"></div>
+    <!-- MODAL OVERLAY + CONTENT -->
+    <div id="overlay" class="overlay"></div>
 
-  <!-- Modal -->
-  <div id="createModal" class="modal">
-    <div class="modal-content bg-[#1A2035] border border-[#232B46] p-6 rounded-xl text-[#E5E7EB]">
-      <h2 class="text-xl font-semibold text-[#A7F3D0] mb-4 text-center">Create New Collaboration</h2>
-      <form method="POST" class="space-y-3">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="flex justify-end gap-3">
-          <button type="button" id="closeModal" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-white transition">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-[#A7F3D0] hover:bg-[#7BE5B4] rounded-md text-[#0A0A1F] font-semibold transition">Post</button>
-        </div>
-      </form>
+    <div id="createModal" class="modal">
+      <div class="modal-content bg-[#050819] border border-[#232B46] p-6 rounded-2xl text-[#E5E7EB] max-w-lg mx-auto">
+        <h2 class="text-xl font-semibold text-[#A7F3D0] mb-4 text-center">Create New Collaboration</h2>
+        <form method="POST" class="space-y-3">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="flex justify-end gap-3">
+            <button type="button" id="closeModal"
+                    class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-white text-sm transition">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="px-4 py-2 bg-[#A7F3D0] hover:bg-[#7BE5B4] rounded-md text-[#0A0A1F] font-semibold text-sm transition">
+              Post
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
 
+    <!-- SCROLL TO TOP -->
+    <button id="scrollToTop"
+      class="fixed bottom-6 right-6 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"
+      title="Scroll to top">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+      </svg>
+    </button>
+
+    <!-- FLOATING COMMENTS PANEL -->
+    <div id="commentsPanel"
+         class="hidden fixed z-50 top-24 right-10 bg-[#050819] border border-[#1F2937] rounded-2xl shadow-2xl flex flex-col"
+         style="width: 480px; height: 420px;">
+      <div id="commentsPanelHeader"
+           class="cursor-move flex items-center justify-between px-4 py-2 border-b border-[#1F2937]">
+        <span class="text-sm font-semibold">Comments</span>
+        <button id="closeCommentsPanel"
+                class="text-lg leading-none px-2 hover:text-red-400">
+          &times;
+        </button>
+      </div>
+      <iframe id="commentsFrame"
+              src=""
+              class="flex-1 w-full border-0 rounded-b-2xl bg-[#050819]">
+      </iframe>
+    </div>
+
+  </main>
 </div>
 
-<!-- Scroll to Top Button -->
-<button id="scrollToTop" 
-  class="fixed bottom-6 right-6 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"
-  title="Scroll to top">
-  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-  </svg>
-</button>
-
-<!-- External JS -->
+<!-- JS -->
 <script src="{% static 'js/dashboard.js' %}"></script>
 <script src="{% static 'js/favorites.js' %}"></script>
-
-<!-- Scroll to Top Script -->
-<script>
-  const scrollToTopBtn = document.getElementById('scrollToTop');
-  const mainContent = document.querySelector('main');
-  
-  mainContent.addEventListener('scroll', function() {
-    if (mainContent.scrollTop > 300) {
-      scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
-      scrollToTopBtn.classList.add('opacity-100');
-    } else {
-      scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
-      scrollToTopBtn.classList.remove('opacity-100');
-    }
-  });
-  
-  scrollToTopBtn.addEventListener('click', function() {
-    mainContent.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
-</script>
 {% endblock %}

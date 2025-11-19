@@ -22,4 +22,6 @@ urlpatterns = [
     path('upload-artwork/', views.upload_artwork, name='upload_artwork'),
     path('toggle-favorite/<int:artwork_id>/', views.toggle_favorite, name='toggle_favorite'),
     path('collaboration/<int:pk>/messages/', views.collab_messages, name='collab_messages'),
+    path('artwork/<int:artwork_id>/comments/', views.artwork_comments, name='artwork_comments'),
+    
 ]
