@@ -4,7 +4,7 @@
 {% block title %}Dashboard | PallettePartner{% endblock %}
 
 {% block content %}
-<div class="h-screen flex bg-[#050819] text-[#E5E7EB] overflow-hidden">
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
 
   <!-- Mobile Overlay -->
   <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
@@ -129,7 +129,7 @@
           {% if artworks %}
             <div class="flex flex-col gap-4">
               {% for artwork in artworks %}
-              <div class="grid md:grid-cols-[minmax(0,_1.4fr)_minmax(220px,_1fr)] gap-4 bg-[#FFFFFF] rounded-3xl p-4 shadow">
+              <div class="grid md:grid-cols-[minmax(0,_1.3fr)_minmax(260px,_1fr)] gap-4 bg-[#FFFFFF] rounded-3xl p-4 shadow">
                 <!-- LEFT TEXT AREA -->
                 <div class="flex flex-col justify-between text-[#111827]">
                   <div>
@@ -145,44 +145,45 @@
                   </div>
 
                   <!-- ICON ROW (artist / favorite / comments) -->
-                  <div class="mt-3 flex items-center gap-4">
+                  <div class="mt-3 flex items-center gap-3">
                     <!-- artist icon -->
                     <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
-                       class="hover:opacity-80 transition" title="Artist Profile">
-                      <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+                       class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                       title="Artist Profile">
+                      <img src="{% static 'icon/artist_icon.png' %}" class="w-4 h-4" alt="Artist">
                     </a>
 
                     <!-- favorite -->
                     <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
                        title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
-                       class="hover:opacity-80 transition">
+                       class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition">
                       {% if artwork.id in user_favorites %}
-                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorite">
+                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4" alt="Favorite">
                       {% else %}
-                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5 opacity-40" alt="Favorite">
+                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4 opacity-40" alt="Favorite">
                       {% endif %}
                     </a>
 
-                    <!-- comments (icon + count) => opens floating panel -->
+                    <!-- comments (icon + count) -->
                     <button type="button"
-                            class="open-comments hover:opacity-80 transition flex items-center gap-1"
+                            class="open-comments flex items-center gap-1 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
                             data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
                             title="View comments">
-                      <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5" alt="Comments">
-                      <span class="text-[11px] text-[#6B7280]">
+                      <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
+                      <span class="text-[11px] text-gray-200">
                         {{ artwork.comment_count|default:0 }}
                       </span>
                     </button>
                   </div>
                 </div>
 
-                <!-- RIGHT IMAGE AREA -->
-                <div class="rounded-2xl bg-[#E5E7EB] flex items-center justify-center overflow-hidden">
+                <!-- RIGHT IMAGE AREA (bigger + darker bg) -->
+                <div class="rounded-3xl bg-[#0F172A] flex items-center justify-center overflow-hidden min-h-[210px]">
                   {% if artwork.image %}
                     <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
-                         class="w-full h-40 md:h-full object-cover">
+                         class="w-full h-full object-cover">
                   {% else %}
-                    <span class="text-sm text-[#6B7280]">Image here</span>
+                    <span class="text-sm text-gray-300">Image here</span>
                   {% endif %}
                 </div>
               </div>

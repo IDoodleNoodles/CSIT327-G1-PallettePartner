@@ -37,16 +37,11 @@
 
 <body class="bg-primary-dark text-text-light font-sans min-h-screen flex flex-col">
 
-    <!-- Page Content -->
-    <main class="flex-1">
+    <!-- Page Content (scrollable area) -->
+    <main class="flex-1 overflow-y-auto">
         {% block content %}
         {% endblock %}
     </main>
-
-    <!-- Footer -->
-    <footer class="text-center py-4 text-xs text-muted border-t border-border-dark bg-secondary-dark">
-        © 2025 PallettePartner. All rights reserved.
-    </footer>
 
     <!-- Custom JS -->
     <script src="{% static 'js/pallate.js' %}"></script>
