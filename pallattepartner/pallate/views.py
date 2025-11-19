@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
@@ -137,10 +138,11 @@ def artist_profile(request, user_id=None):
     }
     return render(request, 'pallate/artist_profile.html', context)
 
-@login_required
+@xframe_options_exempt
+@login_required(login_url='pallate:login')
 def artwork_comments(request, artwork_id):
-    artwork = get_object_or_404(Artwork, pk=artwork_id)
-    comments = artwork.comments.select_related('user')
+    artwork = get_object_or_404(Artwork, id=artwork_id)
+    comments = ArtworkComment.objects.filter(artwork=artwork).select_related('user').order_by('-created_at')
 
     if request.method == 'POST':
         form = ArtworkCommentForm(request.POST)
@@ -158,6 +160,7 @@ def artwork_comments(request, artwork_id):
         'comments': comments,
         'form': form,
     })
+
 
 
 # Collaboration Detail
