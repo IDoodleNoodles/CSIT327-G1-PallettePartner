@@ -3,9 +3,25 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm, CollaborationForm, ProfileForm, ArtworkForm, MessageForm
-from .models import Collaboration, Message, Notification, Artwork, Favorite
+from django.db.models import Count
 
+from .forms import (
+    RegisterForm,
+    CollaborationForm,
+    ProfileForm,
+    ArtworkForm,
+    MessageForm,
+    ArtworkCommentForm,
+)
+
+from .models import (
+    Collaboration,
+    Message,
+    Notification,
+    Artwork,
+    Favorite,
+    ArtworkComment,
+)
 
 
 
@@ -61,9 +77,20 @@ def welcome(request):
 # Dashboard (Protected)
 @login_required(login_url='pallate:login')
 def dashboard(request):
-    posts = Collaboration.objects.all().order_by('-created_at')
-    artworks = Artwork.objects.all().order_by('-created_at')
-    user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
+    # collab posts (same as before, just with select_related for slight perf gain)
+    posts = Collaboration.objects.select_related('user').order_by('-created_at')
+
+    # artworks + number of comments per artwork
+    artworks = (
+        Artwork.objects
+        .select_related('user')
+        .annotate(comment_count=Count('comments'))  # <-- uses ArtworkComment.related_name='comments'
+        .order_by('-created_at')
+    )
+
+    user_favorites = Favorite.objects.filter(
+        user=request.user
+    ).values_list('artwork_id', flat=True)
 
     if request.method == 'POST':
         form = CollaborationForm(request.POST)
@@ -88,10 +115,8 @@ def dashboard(request):
 @login_required(login_url='pallate:login')
 def artist_profile(request, user_id=None):
     from django.contrib.auth.models import User
-    # Support both URL param and query string (?user=)
     target_user_id = user_id or request.GET.get('user')
     if not target_user_id:
-        # Fallback to self if no user specified
         target_user = request.user
     else:
         target_user = get_object_or_404(User, pk=target_user_id)
@@ -100,7 +125,7 @@ def artist_profile(request, user_id=None):
     artist_profile = getattr(target_user, 'profile', None)
     artworks = Artwork.objects.filter(user=target_user).order_by('-created_at')
     user_collaborations = Collaboration.objects.filter(user=target_user).order_by('-created_at')
-    # Current user's favorites to mark hearts
+
     user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
 
     context = {
@@ -111,6 +136,28 @@ def artist_profile(request, user_id=None):
         'user_favorites': user_favorites,
     }
     return render(request, 'pallate/artist_profile.html', context)
+
+@login_required
+def artwork_comments(request, artwork_id):
+    artwork = get_object_or_404(Artwork, pk=artwork_id)
+    comments = artwork.comments.select_related('user')
+
+    if request.method == 'POST':
+        form = ArtworkCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.artwork = artwork
+            comment.user = request.user
+            comment.save()
+            return redirect('pallate:artwork_comments', artwork_id=artwork.id)
+    else:
+        form = ArtworkCommentForm()
+
+    return render(request, 'pallate/artwork_comments.html', {
+        'artwork': artwork,
+        'comments': comments,
+        'form': form,
+    })
 
 
 # Collaboration Detail

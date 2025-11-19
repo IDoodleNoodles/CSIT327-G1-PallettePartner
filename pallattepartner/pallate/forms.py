@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Collaboration, Profile, Artwork, Message
+from .models import Collaboration, Profile, Artwork, Message, ArtworkComment
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label="First Name")
@@ -212,6 +212,18 @@ class ArtworkForm(forms.ModelForm):
             'title': 'Title',
             'description': 'Description',
             'image': 'Upload Image'
+        }
+
+class ArtworkCommentForm(forms.ModelForm):
+    class Meta:
+        model = ArtworkComment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Write your comment...',
+                'class': 'w-full px-3 py-2 rounded-lg bg-[#050819] border border-[#1F2937] text-sm'
+            })
         }
 
 
