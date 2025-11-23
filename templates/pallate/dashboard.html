@@ -40,7 +40,7 @@
 
       <a href="{% url 'pallate:upload_artwork' %}"
          class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
-        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Upload">
+        <img src="{% static 'icon/upload_artwork_icon.png' %}" class="w-5 h-5" alt="Upload">
         <span>Upload Artworks</span>
       </a>
 
@@ -83,12 +83,117 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-4 ml-6">
-        <button class="relative hover:opacity-80 transition">
-          <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5" alt="Notifications">
-          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#4ADE80] rounded-full"></span>
-        </button>
+      <div class="flex items-center gap-4">
+        <!-- NOTIFICATION DROPDOWN -->
+        <div class="relative">
+          <!-- Bell button -->
+          <button id="notifToggle"
+                  type="button"
+                  class="relative hover:opacity-80 transition flex items-center justify-center">
+            <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5" alt="Notifications">
+            {% if unread_count and unread_count > 0 %}
+              <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#A7F3D0] rounded-full"></span>
+            {% endif %}
+          </button>
 
+          <!-- Dropdown panel -->
+          <div id="notifDropdown"
+               class="hidden absolute right-0 mt-3 w-80 bg-[#050819] border border-[#232B46] rounded-2xl shadow-2xl z-50">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#111827]">
+              <div>
+                <p class="text-sm font-semibold text-[#E5E7EB]">Notifications</p>
+                <p class="text-[11px] text-[#9CA3AF]">
+                  {% if unread_count and unread_count > 0 %}
+                    You have {{ unread_count }} unread
+                  {% else %}
+                    You're all caught up 👌
+                  {% endif %}
+                </p>
+              </div>
+              {% if unread_count and unread_count > 0 %}
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#A7F3D0] text-[11px] font-semibold text-[#050819]">
+                  {{ unread_count }}
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- LIST -->
+            <div class="max-h-80 overflow-y-auto py-2">
+              {% if notifications %}
+                {% for n in notifications %}
+                  <a href="{{ n.target_url|default:'#' }}"
+                     class="flex items-start gap-3 px-4 py-3 hover:bg-[#0B1024] transition relative">
+
+                    {# unread status dot #}
+                    {% if not n.is_read %}
+                      <span class="absolute left-2 top-1.5 w-2 h-2 bg-[#A7F3D0] rounded-full"></span>
+                    {% endif %}
+
+                    {# icon per type #}
+                    <div class="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-[#0B1024] flex items-center justify-center">
+                      {% if n.notification_type == 'comment' %}
+                        <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comment">
+                      {% elif n.notification_type == 'message' %}
+                        <img src="{% static 'icon/message_icon.png' %}" class="w-4 h-4" alt="Message">
+                      {% elif n.notification_type == 'collab' %}
+                        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-4 h-4" alt="Collaboration">
+                      {% else %}
+                        <img src="{% static 'icon/notification_icon.png' %}" class="w-4 h-4" alt="Notification">
+                      {% endif %}
+                    </div>
+
+                    {# text content #}
+                    <div class="flex-1">
+                      <p class="text-xs font-semibold text-[#E5E7EB]">
+                        {% if n.actor %}
+                          {{ n.actor.username }}
+                        {% else %}
+                          System
+                        {% endif %}
+                      </p>
+
+                      <p class="text-xs text-[#9CA3AF]">
+                        {% if n.notification_type == 'comment' %}
+                          commented on your artwork
+                        {% elif n.notification_type == 'message' %}
+                          sent you a message
+                        {% elif n.notification_type == 'collab' %}
+                          requested to collaborate
+                        {% else %}
+                          {{ n.message }}
+                        {% endif %}
+                      </p>
+
+                      <p class="text-[10px] text-[#6B7280] mt-1">
+                        {{ n.created_at|timesince }} ago
+                      </p>
+                    </div>
+                  </a>
+                {% endfor %}
+              {% else %}
+                <div class="px-4 py-6 text-center text-xs text-[#9CA3AF]">
+                  No notifications.
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Footer buttons -->
+            <div class="flex items-center justify-between px-4 py-3 border-t border-[#111827] text-xs">
+              <a href="#" class="px-3 py-1.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-[#E5E7EB]">
+                Show more
+              </a>
+              <button type="button"
+                      id="notifClose"
+                      class="px-3 py-1.5 rounded-full bg-[#1F2937] hover:bg-[#374151] text-[#E5E7EB]">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGOUT BUTTON -->
         <form action="{% url 'pallate:logout' %}" method="post">
           {% csrf_token %}
           <button type="submit"
@@ -325,4 +430,5 @@
 <!-- JS -->
 <script src="{% static 'js/dashboard.js' %}"></script>
 <script src="{% static 'js/favorites.js' %}"></script>
+<script src="{% static 'js/notifications.js' %}"></script>
 {% endblock %}

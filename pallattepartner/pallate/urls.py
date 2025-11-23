@@ -23,5 +23,7 @@ urlpatterns = [
     path('toggle-favorite/<int:artwork_id>/', views.toggle_favorite, name='toggle_favorite'),
     path('collaboration/<int:pk>/messages/', views.collab_messages, name='collab_messages'),
     path('artwork/<int:artwork_id>/comments/', views.artwork_comments, name='artwork_comments'),
+    path('notifications/mark-as-read/<int:notification_id>/', views.mark_notification_as_read, name='mark_notification_as_read'),
+    path('notifications/', views.notifications_list, name='notifications_list'),
     
 ]

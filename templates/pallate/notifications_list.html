@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Notifications | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-10">
+  <h1 class="text-2xl font-bold mb-4">Notifications</h1>
+
+  {% if notifications %}
+    <div class="space-y-3">
+      {% for n in notifications %}
+        <div class="flex items-start gap-3 bg-[#050819] border border-[#1F2937] rounded-xl px-4 py-3">
+          <div class="mt-1 w-8 h-8 rounded-full bg-[#0B1024] flex items-center justify-center">
+            <!-- you can reuse the same icon logic here later -->
+            <img src="{% static 'icon/notification_icon.png' %}" class="w-4 h-4" alt="">
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold">
+              {% if n.actor %}{{ n.actor.username }}{% else %}System{% endif %}
+            </p>
+            <p class="text-xs text-[#9CA3AF]">{{ n.message }}</p>
+            <p class="text-[10px] text-[#6B7280] mt-1">{{ n.created_at|timesince }} ago</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-[#9CA3AF]">No notifications yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
