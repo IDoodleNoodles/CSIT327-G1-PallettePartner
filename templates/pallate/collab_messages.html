@@ -1,62 +1,234 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Messages | PallettePartner{% endblock %}
-{% block content %}
-<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] flex flex-col">
-  <!-- Header -->
-  <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E2639] bg-[#0D1426] sticky top-0 z-10">
-    <a href="{% url 'pallate:dashboard' %}" class="hover:opacity-80 transition">
-      <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5" alt="Back">
-    </a>
-    <div class="flex-1">
-      <h1 class="font-semibold text-lg text-[#A7F3D0]">{{ collaboration.title }}</h1>
-      <p class="text-xs text-[#9CA3AF]">Collaboration Chat</p>
-    </div>
-  </div>
+{% block title %}{{ collaboration.title }} | Collaboration Chat{% endblock %}
 
-  <!-- Messages Area -->
-  <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-    {% if messages %}
-      {% for msg in messages %}
-        <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
-          <div class="p-3 rounded-lg max-w-md sm:max-w-lg {% if msg.sender == request.user %}bg-[#4F46E5] text-white{% else %}bg-[#1A2035]{% endif %} shadow-md">
-          <p class="text-xs font-semibold mb-1 {% if msg.sender == request.user %}text-[#A7F3D0]{% else %}text-[#7BE5B4]{% endif %}">
-            {{ msg.sender.username }}
+{% block content %}
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
+
+  <!-- LEFT MENU -->
+  <aside class="bg-[#050819] w-64 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl">
+    <h1 class="text-base font-semibold text-white flex items-center gap-2 mb-8">
+      <span>Menu</span>
+    </h1>
+
+    <nav class="flex flex-col gap-3 text-sm font-medium text-[#CBD5F5]">
+      <a href="{% url 'pallate:dashboard' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+        <span>Artist</span>
+      </a>
+
+      <a href="{% url 'pallate:collaboration_detail_legacy' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#12172D] text-white">
+        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaboration">
+        <span>Collaboration</span>
+      </a>
+
+      <a href="{% url 'pallate:upload_artwork' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/Upload_artwork_icon.png' %}" class="w-5 h-5" alt="Upload">
+        <span>Upload Artworks</span>
+      </a>
+
+      <a href="{% url 'pallate:favorites' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorites">
+        <span>Favorites</span>
+      </a>
+
+      <a href="{% url 'pallate:profile' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
+        <span>My Profile</span>
+      </a>
+    </nav>
+
+    <div class="mt-auto pt-8 border-t border-[#111827]">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white text-sm">
+        <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5" alt="Settings">
+        <span>Settings</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- RIGHT SIDE -->
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-hidden">
+    <!-- TOP BAR -->
+    <header class="flex items-center justify-between px-10 py-4">
+      <div class="flex items-center gap-3">
+        
+        <div>
+          <p class="text-sm text-[#9CA3AF]">Collaboration Chat</p>
+          <h1 class="text-xl font-semibold text-[#A7F3D0]">
+            {{ collaboration.title }}
+          </h1>
+        </div>
+      </div>
+
+      <form action="{% url 'pallate:logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit"
+                class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition">
+          Logout
+        </button>
+      </form>
+    </header>
+
+    <!-- HERO BANNER -->
+    <section class="px-10 pb-4">
+      <div class="relative w-full h-48 rounded-3xl overflow-hidden">
+        <img src="{% static 'icon/dashboard_banner.jpg' %}"
+             onerror="this.style.display='none'"
+             class="w-full h-full object-cover" alt="Banner">
+        <div class="absolute inset-0 bg-gradient-to-r from-[#050819]/90 via-[#050819]/40 to-transparent flex flex-col justify-center px-10">
+          <h2 class="text-2xl font-bold text-white mb-1">
+            {{ collaboration.title }}
+          </h2>
+          <p class="text-sm text-[#E5E7EB]/80">
+            Chat with artists in this collaboration room.
           </p>
-          <p class="text-sm">{{ msg.text }}</p>
-          <small class="text-xs {% if msg.sender == request.user %}text-gray-200{% else %}text-gray-400{% endif %}">{{ msg.timestamp|timesince }} ago</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="flex-1 px-10 pb-8 flex gap-6 overflow-hidden">
+      <!-- MESSAGES COLUMN -->
+      <div class="flex-1 flex flex-col bg-[#050819] rounded-3xl border border-[#1F2937] shadow-2xl">
+        <!-- Messages label -->
+        <div class="px-6 pt-4">
+          <div class="inline-flex bg-white rounded-full px-5 py-1 text-sm font-semibold text-[#E53E3E]">
+            Messages
           </div>
         </div>
-      {% endfor %}
-    {% else %}
-      <div class="text-center text-[#9CA3AF] py-8">
-        <p class="mb-2">💬 No messages yet</p>
-        <p class="text-sm">Start the conversation!</p>
+
+        <!-- Messages list -->
+        <div class="flex-1 mt-4 px-4 pb-4 overflow-y-auto space-y-4">
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="bg-[#0B1024] rounded-3xl px-5 py-4 flex flex-col gap-2 shadow">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-[#111827] flex items-center justify-center text-sm font-semibold">
+                      {{ msg.sender.username|first|upper }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-semibold">
+                        {{ msg.sender.username }}
+                      </p>
+                      <p class="text-[11px] text-[#9CA3AF]">
+                        {{ msg.timestamp|timesince }} ago
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {% if msg.text %}
+                  <p class="text-sm text-[#E5E7EB]">
+                    {{ msg.text }}
+                  </p>
+                {% endif %}
+
+                {% if msg.image %}
+                  <div class="mt-2 rounded-2xl overflow-hidden border border-[#1F2937] bg-black/40 max-w-md">
+                    <img src="{{ msg.image.url }}" alt="Attachment"
+                         class="w-full h-auto object-cover">
+                  </div>
+                {% endif %}
+
+                <!-- Emoji reactions (UI only for now) -->
+                <div class="mt-3 flex items-center gap-3 text-xs text-[#9CA3AF]">
+                  <button type="button"
+                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                          data-message-id="{{ msg.id }}" data-emoji="❤️">
+                    <span>❤️</span><span>React</span>
+                  </button>
+                  <button type="button"
+                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                          data-message-id="{{ msg.id }}" data-emoji="😂">
+                    <span>😂</span><span>Haha</span>
+                  </button>
+                  <button type="button"
+                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                          data-message-id="{{ msg.id }}" data-emoji="👍">
+                    <span>👍</span><span>Like</span>
+                  </button>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="h-full flex flex-col items-center justify-center text-center text-sm text-[#9CA3AF] gap-2">
+              <div class="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center mb-2">
+                <span class="text-lg">💬</span>
+              </div>
+              <p class="text-base text-white font-semibold">No messages yet</p>
+              <p>Start the conversation by sending the first message.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- INPUT BAR -->
+        <form method="post"
+              enctype="multipart/form-data"
+              class="border-t border-[#1F2937] px-6 py-4 flex items-center gap-3 bg-[#050819]">
+          {% csrf_token %}
+          <div class="flex-1">
+            {{ form.text }}
+          </div>
+
+          <!-- attach image -->
+          <label for="id_image"
+                 class="w-10 h-10 flex items-center justify-center rounded-full bg-[#111827] hover:bg-[#1F2937] cursor-pointer">
+            <img src="{% static 'icon/upload_icon.png' %}" class="w-4 h-4" alt="Attach">
+          </label>
+          {{ form.image }}
+
+          <button type="submit"
+                  class="px-6 py-2 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-semibold text-white">
+            Send
+          </button>
+        </form>
       </div>
-    {% endif %}
-  </div>
 
-  <!-- Message Input Form -->
-  <form method="POST" class="p-4 bg-[#0D1426] border-t border-[#1E2639]">
-    {% csrf_token %}
-    <div class="flex items-end gap-3">
-      {{ form.text }}
-      <button type="submit" class="bg-[#A7F3D0] hover:bg-[#7BE5B4] px-4 sm:px-6 py-2 rounded-lg text-[#0A0A1F] font-semibold transition whitespace-nowrap">
-        <span class="hidden sm:inline">Send</span>
-        <span class="sm:hidden">📤</span>
-      </button>
-    </div>
-  </form>
+      <!-- ACTIVE ARTIST COLUMN -->
+      <aside class="w-80 flex flex-col bg-[#050819] rounded-3xl border border-[#1F2937] shadow-2xl">
+        <div class="px-5 py-4 border-b border-[#1F2937]">
+          <h2 class="text-base font-semibold text-[#C4B5FD]">Active Artist</h2>
+        </div>
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          {% if participants %}
+            {% for user in participants %}
+              <div class="flex items-center justify-between bg-white rounded-2xl px-4 py-3 shadow">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#E5E7EB] flex items-center justify-center text-xs font-semibold text-[#4B5563]">
+                    {{ user.username|first|upper }}
+                  </div>
+                  <div class="text-[#111827]">
+                    <p class="text-sm font-medium">{{ user.username }}</p>
+                    <p class="text-[11px] text-[#9CA3AF]">Online</p>
+                  </div>
+                </div>
+                <button type="button"
+                        class="w-9 h-9 flex items-center justify-center rounded-full bg-[#F3F4F6] hover:bg-[#E5E7EB] transition">
+                  <img src="{% static 'icon/message_icon.png' %}" class="w-4 h-4" alt="DM">
+                </button>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-xs text-[#9CA3AF] text-center">
+              No active artists listed.
+            </p>
+          {% endif %}
+        </div>
+      </aside>
+    </section>
+  </main>
 </div>
-
-<!-- Auto-scroll to bottom script -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const messagesContainer = document.getElementById('messages-container');
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-  });
-</script>
 {% endblock %}

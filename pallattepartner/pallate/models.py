@@ -33,13 +33,24 @@ class Collaboration(models.Model):
         return self.title
     
 class Message(models.Model):
-    collaboration = models.ForeignKey(Collaboration, on_delete=models.CASCADE, related_name='messages')
+    collaboration = models.ForeignKey(
+        Collaboration,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(blank=True)
+    image = models.ImageField(upload_to="chat_images/", blank=True, null=True)
+    reaction = models.CharField(max_length=10, blank=True)  # e.g. "❤️", "👍"
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.sender.username}: {self.text[:30]}"
+        base = f"{self.sender.username}: "
+        if self.text:
+            return base + self.text[:30]
+        if self.image:
+            return base + "[image]"
+        return base + "[empty]"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

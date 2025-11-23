@@ -4,60 +4,155 @@
 {% block title %}Favorites | PallettePartner{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] flex flex-col">
-  <div class="flex items-center gap-2 px-6 py-4 border-b border-[#1E2639] bg-[#0D1426]">
-    <a href="{% url 'pallate:dashboard' %}">
-      <img src="{% static 'icon/back_icon.png' %}" class="w-5 h-5 hover:opacity-80 transition">
-    </a>
-    <h1 class="text-lg font-semibold text-[#A7F3D0]">My Favorites</h1>
-  </div>
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
 
-  <div class="flex-1 overflow-y-auto px-8 py-6 space-y-5">
-    {% if favorite_posts %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {% for fav in favorite_posts %}
-          <div class="bg-[#1A2035] border border-[#232B46] rounded-lg overflow-hidden hover:border-[#A7F3D0] transition shadow-sm">
-        {% if fav.artwork.image %}
-            <div class="relative group">
-              <img src="{{ fav.artwork.image.url }}" alt="{{ fav.artwork.title }}" class="w-full h-48 object-cover">
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
-            </div>
-        {% endif %}
-        
-            <div class="p-4">
-              <h3 class="text-lg font-semibold text-[#A7F3D0]">{{ fav.artwork.title }}</h3>
-              <p class="text-[#9CA3AF] mt-2 text-sm line-clamp-2">{{ fav.artwork.description }}</p>
-            
-              <div class="text-sm text-[#6B7280] mt-3 flex gap-4 items-center">
-                <span>👤 {{ fav.artwork.user.username }}</span>
-                <span>🕒 {{ fav.artwork.created_at|timesince }} ago</span>
-              </div>
+  <!-- LEFT MENU (same as dashboard / collab_messages) -->
+  <aside id="sidebar"
+         class="bg-[#050819] w-64 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl h-full">
 
-              <!-- Action buttons -->
-              <div class="flex gap-4 mt-4 items-center">
-                <a href="{% url 'pallate:toggle_favorite' fav.artwork.id %}" 
-                   title="Remove from favorites" 
-                   class="hover:scale-110 transition-transform">
-                  <span class="text-2xl">❤️</span>
-                </a>
-                <a href="{% url 'pallate:artist_profile_by_id' fav.artwork.user.id %}" 
-                   title="Artist Profile" 
-                   class="hover:opacity-80 transition">
-                  <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
-                </a>
-              </div>
-            </div>
-        </div>
-          {% endfor %}
+    <h1 class="text-base font-semibold text-white flex items-center gap-2 mb-8">
+      <span>Menu</span>
+    </h1>
+
+    <nav class="flex flex-col gap-3 text-sm font-medium text-[#CBD5F5]">
+      <a href="{% url 'pallate:dashboard' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg
+                {% if request.path == '/dashboard/' %}bg-[#12172D] text-white{% else %}hover:bg-[#12172D] hover:text-white{% endif %}">
+        <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artists">
+        <span>Artist</span>
+      </a>
+
+      <a href="{% url 'pallate:collaboration_detail_legacy' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaboration">
+        <span>Collaboration</span>
+      </a>
+
+      <a href="{% url 'pallate:upload_artwork' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Upload">
+        <span>Upload Artworks</span>
+      </a>
+
+      <a href="{% url 'pallate:favorites' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#12172D] text-white">
+        <img src="{% static 'icon/favorite_icon.png' %}" class="w-5 h-5" alt="Favorites">
+        <span>Favorites</span>
+      </a>
+
+      <a href="{% url 'pallate:profile' %}"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+        <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
+        <span>My Profile</span>
+      </a>
+    </nav>
+
+    <div class="mt-auto pt-8 border-t border-[#111827]">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white text-sm">
+        <img src="{% static 'icon/settings_icon.png' %}" class="w-5 h-5" alt="Settings">
+        <span>Settings</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- RIGHT CONTENT -->
+  <main class="flex-1 flex flex-col bg-[#050819]">
+
+    <!-- TOP BAR (similar vibe to collab messages) -->
+    <header class="flex items-center justify-between px-10 py-4 border-b border-[#111827] bg-[#050819]">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-[#9CA3AF]">Favorites</p>
+        <h1 class="text-2xl font-bold text-white">My Favorites</h1>
+        <p class="text-xs text-[#6B7280] mt-1">
+          All the artworks you’ve starred in one place.
+        </p>
       </div>
-    {% else %}
-      <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-12 bg-[#111827] mx-6 shadow-inner">
-          <p class="mb-4">You haven't added any favorites yet.</p>
-          <a href="{% url 'pallate:dashboard' %}" class="inline-block bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-5 py-2 rounded-lg font-semibold transition">
+
+      <form action="{% url 'pallate:logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit"
+                class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition">
+          Logout
+        </button>
+      </form>
+    </header>
+
+    <!-- FAVORITES LIST (cards styled like chat messages panel) -->
+    <section class="flex-1 px-10 py-8 overflow-y-auto">
+
+      {% if favorite_posts %}
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {% for fav in favorite_posts %}
+          <article class="bg-[#0B1024] border border-[#1E2639] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            {% if fav.artwork.image %}
+            <div class="relative group h-48 overflow-hidden">
+              <img src="{{ fav.artwork.image.url }}" alt="{{ fav.artwork.title }}"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            {% endif %}
+
+            <div class="px-5 py-4 flex-1 flex flex-col">
+              <!-- Title + description -->
+              <div>
+                <h2 class="text-base font-semibold text-white">{{ fav.artwork.title }}</h2>
+                <p class="mt-1 text-xs text-[#9CA3AF] line-clamp-2">
+                  {{ fav.artwork.description }}
+                </p>
+              </div>
+
+              <!-- Meta (artist + time) -->
+              <div class="mt-4 text-[11px] text-[#6B7280] flex items-center gap-4">
+                <span class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#111827] text-[11px] font-semibold">
+                    {{ fav.artwork.user.username|first|upper }}
+                  </span>
+                  {{ fav.artwork.user.username }}
+                </span>
+                <span>· {{ fav.artwork.created_at|timesince }} ago</span>
+              </div>
+
+              <!-- Actions (styled similar to reaction row on messages) -->
+              <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <a href="{% url 'pallate:toggle_favorite' fav.artwork.id %}"
+                     title="Remove from favorites"
+                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-xs text-[#FCA5A5]">
+                    <span>❤️</span>
+                    <span>Unfavorite</span>
+                  </a>
+
+                  <a href="{% url 'pallate:artist_profile_by_id' fav.artwork.user.id %}"
+                     title="Artist Profile"
+                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-xs text-[#E5E7EB]">
+                    <img src="{% static 'icon/artist_icon.png' %}" class="w-4 h-4" alt="">
+                    <span>View artist</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- EMPTY STATE (still matches dashboard / chat style) -->
+        <div class="mt-16 max-w-xl mx-auto text-center border border-dashed border-[#374151] rounded-3xl py-16 bg-[#050819] shadow-inner">
+          <p class="text-sm text-[#9CA3AF] mb-2">You haven't added any favorites yet.</p>
+          <p class="text-xs text-[#6B7280] mb-6">Browse artworks and tap the heart icon to save them here.</p>
+          <a href="{% url 'pallate:dashboard' %}"
+             class="inline-flex items-center gap-2 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#050819] px-6 py-2.5 rounded-full text-sm font-semibold transition">
             Browse Artworks
           </a>
-      </div>
-    {% endif %}
-  </div>
+        </div>
+      {% endif %}
+
+    </section>
+  </main>
 </div>
 {% endblock %}
