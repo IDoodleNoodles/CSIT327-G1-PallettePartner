@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.contrib.auth.models import User
 
 from .forms import (
     RegisterForm,
@@ -22,7 +24,9 @@ from .models import (
     Artwork,
     Favorite,
     ArtworkComment,
+    Notification,
 )
+from pallattepartner.pallate import models
 
 
 
@@ -78,20 +82,38 @@ def welcome(request):
 # Dashboard (Protected)
 @login_required(login_url='pallate:login')
 def dashboard(request):
-    # collab posts (same as before, just with select_related for slight perf gain)
-    posts = Collaboration.objects.select_related('user').order_by('-created_at')
-
-    # artworks + number of comments per artwork
-    artworks = (
-        Artwork.objects
+    # Collab posts
+    posts = (
+        Collaboration.objects
         .select_related('user')
-        .annotate(comment_count=Count('comments'))  # <-- uses ArtworkComment.related_name='comments'
         .order_by('-created_at')
     )
 
+    # Artworks + number of comments per artwork
+    artworks = (
+        Artwork.objects
+        .select_related('user')
+        .annotate(comment_count=Count('comments'))
+        .order_by('-created_at')
+    )
+
+    # Favorites of current user
     user_favorites = Favorite.objects.filter(
         user=request.user
     ).values_list('artwork_id', flat=True)
+
+    # 🔔 Notifications for this user (top 10 newest)
+    notifications = (
+        Notification.objects
+        .filter(user=request.user)
+        .order_by('-created_at')[:10]
+    )
+
+    # Unread count (for the little dot / badge)
+    unread_count = Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).count()
 
     if request.method == 'POST':
         form = CollaborationForm(request.POST)
@@ -109,8 +131,41 @@ def dashboard(request):
         'posts': posts,
         'artworks': artworks,
         'user_favorites': user_favorites,
+        'notifications': notifications,
+        'unread_count': unread_count,
     })
 
+@login_required(login_url='pallate:login')
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(
+        Notification,
+        id=notification_id,
+        user=request.user
+    )
+
+    # mark as read
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+
+    # asa ta mo-redirect after clicking
+    redirect_url = request.GET.get('next') or notification.target_url
+    if not redirect_url:
+        redirect_url = reverse('pallate:dashboard')
+
+    return redirect(redirect_url)
+
+@login_required(login_url='pallate:login')
+def notifications_list(request):
+    notifications = (
+        Notification.objects
+        .filter(user=request.user)
+        .select_related('actor')
+        .order_by('-created_at')[:50]
+    )
+    return render(request, 'pallate/notifications_list.html', {
+        'notifications': notifications,
+    })
 
 # Artist Profile (view another user's public profile)
 @login_required(login_url='pallate:login')
@@ -274,34 +329,54 @@ def toggle_favorite(request, artwork_id):
     return redirect('pallate:dashboard')
 
 
-# Collaboration Chat
 @login_required
 def collab_messages(request, pk):
     collaboration = get_object_or_404(Collaboration, pk=pk)
-    messages_qs = Message.objects.filter(collaboration=collaboration).order_by('timestamp')
+
+    messages_qs = (
+        Message.objects
+        .filter(collaboration=collaboration)
+        .select_related("sender")
+        .order_by("timestamp")
+    )
 
     if request.method == 'POST':
-        form = MessageForm(request.POST)
+        form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
             message = form.save(commit=False)
             message.collaboration = collaboration
             message.sender = request.user
             message.save()
 
-            # Notify the owner
-            if request.user != collaboration.user:
-                Notification.objects.create(
-                    user=collaboration.user,
-                    text=f"New message from {request.user.username} in '{collaboration.title}'"
-                )
+            if hasattr(models, "Notification") and request.user != collaboration.user:
+                try:
+                    Notification.objects.create(
+                        user=collaboration.user,
+                        actor=request.user,
+                        notification_type="message",
+                        message=f"New message from {request.user.username} in '{collaboration.title}'",
+                        target_url=reverse("pallate:collab_messages", args=[pk]),
+                    )
+                except TypeError:
+                    Notification.objects.create(
+                        user=collaboration.user,
+                        text=f"New message from {request.user.username} in '{collaboration.title}'"
+                    )
 
             messages.success(request, "Message sent!")
             return redirect('pallate:collab_messages', pk=pk)
     else:
         form = MessageForm()
 
+    participants = (
+        User.objects
+        .filter(message__collaboration=collaboration)
+        .distinct()
+    )
+
     return render(request, 'pallate/collab_messages.html', {
         'collaboration': collaboration,
         'messages': messages_qs,
+        'participants': participants,
         'form': form,
     })

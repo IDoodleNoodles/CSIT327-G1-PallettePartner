@@ -1,44 +1,44 @@
-// Notification system
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas fa-${getNotificationIcon(type)}"></i>
-            <span>${message}</span>
-        </div>
-    `;
+// static/js/notifications.js
+document.addEventListener("DOMContentLoaded", () => {
+  const bell = document.getElementById("notifToggle");
+  const dropdown = document.getElementById("notifDropdown");
+  const closeBtn = document.getElementById("notifClose");
 
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #1f2937;
-        color: #f3f4f6;
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        border: 1px solid #374151;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
+  if (!bell || !dropdown) return;
 
-    document.body.appendChild(notification);
+  const openDropdown = () => {
+    dropdown.classList.remove("hidden");
+  };
 
-    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
+  const closeDropdown = () => {
+    dropdown.classList.add("hidden");
+  };
 
-function getNotificationIcon(type) {
-    const icons = {
-        success: 'check-circle',
-        error: 'exclamation-circle',
-        warning: 'exclamation-triangle',
-        info: 'info-circle'
-    };
-    return icons[type] || 'info-circle';
-}
+  bell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("hidden");
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeDropdown();
+    });
+  }
+
+  // close kung mo-click outside
+  document.addEventListener("click", (e) => {
+    if (!dropdown.classList.contains("hidden")) {
+      if (!dropdown.contains(e.target) && e.target !== bell) {
+        closeDropdown();
+      }
+    }
+  });
+
+  // ESC key to close
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeDropdown();
+    }
+  });
+});
