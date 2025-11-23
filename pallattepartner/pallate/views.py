@@ -28,8 +28,6 @@ from .models import (
 )
 from pallattepartner.pallate import models
 
-
-
 # Landing Page
 def landing(request):
     return render(request, 'pallate/index.html')

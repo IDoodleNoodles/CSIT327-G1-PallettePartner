@@ -226,18 +226,20 @@ class ArtworkCommentForm(forms.ModelForm):
             })
         }
 
-
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ['text']
+        fields = ["text", "image"] 
+
         widgets = {
-            'text': forms.Textarea(attrs={
-                'placeholder': 'Type your message...',
-                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
-                'rows': 3
-            })
-        }
-        labels = {
-            'text': 'Message'
+            "text": forms.Textarea(attrs={
+                "rows": 2,
+                "placeholder": "Type your message...",
+                "class": "w-full bg-[#111827] text-[#E5E7EB] text-sm rounded-2xl px-4 py-3 border border-[#1F2937] focus:outline-none focus:border-[#8B5CF6]",
+            }),
+            "image": forms.ClearableFileInput(attrs={
+                "class": "hidden",          
+                "accept": "image/*",        
+                "id": "id_image",           
+            }),
         }
