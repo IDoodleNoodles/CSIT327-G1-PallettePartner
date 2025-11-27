@@ -1,15 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Welcome | PallettePartner{% endblock %}
 {% block content %}
-<main class="main-content">
-  <div class="container">
-    <div class="flex items-center justify-center py-12">
-      <div class="bg-card-dark p-10 rounded-2xl shadow-xl w-full max-w-2xl text-center">
+<div class="flex items-center justify-center min-h-full w-full py-12">
+  <div class="bg-card-dark p-10 rounded-2xl shadow-xl w-full max-w-2xl text-center">
         <h1 class="text-3xl font-bold mb-4">Welcome to PallettePartner</h1>
         <p class="text-gray-300 mb-6">Thanks for joining — your account has been created and you're now logged in.</p>
         <a href="{% url 'pallate:dashboard' %}" class="btn-primary px-6 py-3 rounded-lg">Go to Dashboard</a>
-      </div>
-    </div>
   </div>
-</main>
+</div>
 {% endblock %}

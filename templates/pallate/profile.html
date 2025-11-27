@@ -6,16 +6,20 @@
 <div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] py-8">
   <div class="max-w-6xl mx-auto px-4">
     
-    <!-- Header with Edit Button -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] bg-clip-text text-transparent">Artist Profile</h1>
-      <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-        <a href="{% url 'pallate:dashboard' %}" class="flex-1 sm:flex-none text-center bg-gray-700 hover:bg-gray-600 text-[#E5E7EB] px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base">
-          Back to Dashboard
-        </a>
-        <a href="{% url 'pallate:edit_profile' %}" class="flex-1 sm:flex-none text-center bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base">
-          Edit Profile
-        </a>
+    <!-- Header with Back + Title + Edit Button -->
+    <div class="mb-6">
+      <div class="grid grid-cols-3 items-center">
+        <div class="flex">
+          <a href="{% url 'pallate:dashboard' %}"
+             class="inline-flex w-max items-center gap-2 bg-[#232B46] hover:bg-[#374151] text-[#E5E7EB] px-3 py-2 rounded-lg font-semibold transition text-sm">
+            <span class="text-lg">←</span>
+            <span>Back to Dashboard</span>
+          </a>
+        </div>
+        <div class="flex justify-center">
+          <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] bg-clip-text text-transparent">My Profile</h1>
+        </div>
+        <div></div>
       </div>
     </div>
 
@@ -75,6 +79,12 @@
             <div class="md:col-span-2">
               <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Bio / About Me</div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB] whitespace-pre-wrap min-h-[80px]">{{ user.profile.bio|default:"Not set" }}</p>
+            </div>
+            <div class="md:col-span-2 flex justify-end mt-4">
+              <a href="{% url 'pallate:edit_profile' %}"
+                 class="inline-flex items-center justify-center bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base">
+                Edit Profile
+              </a>
             </div>
           </div>
         </section>

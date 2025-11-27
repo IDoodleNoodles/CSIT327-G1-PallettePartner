@@ -40,10 +40,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, f"Welcome back, {user.username}!")
             return redirect('pallate:dashboard')
-        else:
-            messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
     return render(request, 'pallate/login.html', {'form': form})
@@ -56,7 +53,6 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"Welcome, {user.username}! Your account has been created.")
             return redirect('pallate:welcome')
         else:
             messages.error(request, 'Please correct the errors below.')
@@ -119,7 +115,6 @@ def dashboard(request):
             new_post = form.save(commit=False)
             new_post.user = request.user
             new_post.save()
-            messages.success(request, "Collaboration post created successfully!")
             return redirect('pallate:dashboard')
     else:
         form = CollaborationForm()
@@ -272,7 +267,6 @@ def edit_profile(request):
                 from django.contrib.auth import update_session_auth_hash
                 update_session_auth_hash(request, request.user)
             
-            messages.success(request, "Profile updated successfully!")
             return redirect('pallate:profile')
     else:
         form = ProfileForm(instance=profile)
@@ -288,7 +282,6 @@ def upload_artwork(request):
             artwork = form.save(commit=False)
             artwork.user = request.user
             artwork.save()
-            messages.success(request, "Artwork uploaded successfully!")
             return redirect('pallate:dashboard')
     else:
         form = ArtworkForm()
@@ -318,7 +311,6 @@ def toggle_favorite(request, artwork_id):
         messages.info(request, "Removed from favorites.")
     else:
         favorited = True
-        messages.success(request, "Added to favorites!")
     
     # Return JSON for AJAX requests
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -361,7 +353,6 @@ def collab_messages(request, pk):
                         text=f"New message from {request.user.username} in '{collaboration.title}'"
                     )
 
-            messages.success(request, "Message sent!")
             return redirect('pallate:collab_messages', pk=pk)
     else:
         form = MessageForm()
