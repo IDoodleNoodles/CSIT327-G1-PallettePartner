@@ -248,7 +248,7 @@
         <div class="bg-[#050819] rounded-3xl shadow-2xl border border-[#1F2937] px-6 py-6">
           <h2 class="text-xl font-bold text-white mb-4">Recent Uploads</h2>
           {% if artworks %}
-            <div class="flex flex-col gap-4">
+            <div id="recentUploadsScroller" class="flex flex-col gap-4 max-h-[600px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-transparent hover:scrollbar-thumb-[#4B5563]">
               {% for artwork in artworks %}
               <div class="grid md:grid-cols-[minmax(0,_1.3fr)_minmax(260px,_1fr)] gap-4 bg-card-dark border border-border-dark rounded-3xl p-4 shadow">
                 <!-- LEFT TEXT AREA -->
@@ -327,10 +327,10 @@
               <div class="flex items-center justify-between bg-card-dark border border-border-dark rounded-2xl px-4 py-3 shadow">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-full bg-[#232B46] flex items-center justify-center text-xs font-semibold text-text-light">
-                    {{ post.user.username|first|upper }}
+                    {{ post.owner.username|first|upper }}
                   </div>
                   <div class="text-text-light">
-                    <p class="text-sm font-medium">{{ post.user.username }}</p>
+                    <p class="text-sm font-medium">{{ post.owner.username }}</p>
                     <p class="text-[11px] text-muted">
                       {{ post.created_at|timesince }} ago
                     </p>
@@ -352,36 +352,7 @@
         </aside>
       </div>
 
-      <!-- COLLABORATION LIST (optional) -->
-      <section class="mt-10">
-        <h2 class="text-xl font-bold text-white mb-4">Collaboration Opportunities</h2>
-        {% if posts %}
-          {% for post in posts %}
-          <div class="bg-[#050819] border border-[#1F2937] rounded-2xl p-5 mb-4 shadow hover:border-[#8B5CF6] transition">
-            <h3 class="text-lg font-semibold text-white">{{ post.title }}</h3>
-            <p class="text-sm text-muted mt-2">{{ post.description }}</p>
 
-            <div class="text-xs text-muted mt-3 flex gap-4 items-center">
-              <span>👤 {{ post.user.username }}</span>
-              <span>🕒 {{ post.created_at|timesince }} ago</span>
-            </div>
-
-            <div class="flex gap-4 mt-4 items-center">
-              <a href="{% url 'pallate:collab_messages' post.id %}" title="Message" class="hover:opacity-80 transition">
-                <img src="{% static 'icon/message_icon.png' %}" class="w-5 h-5" alt="Message">
-              </a>
-              <a href="{% url 'pallate:artist_profile_by_id' post.user.id %}" title="Artist Profile" class="hover:opacity-80 transition">
-                <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
-              </a>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="text-center text-muted text-sm border border-[#1F2937] rounded-xl py-10 bg-[#050819] shadow-inner">
-            No collaboration posts yet. Be the first to share your ideas!
-          </div>
-        {% endif %}
-      </section>
     </section>
 
     <!-- FLOATING CREATE BUTTON -->
@@ -394,7 +365,7 @@
     <div id="overlay" class="overlay"></div>
 
     <div id="createModal" class="modal">
-      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-md mx-auto shadow-2xl">
+      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-4xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="bg-[#0B1024] rounded-2xl p-5">
           <h2 class="text-xl font-semibold text-[#A7F3D0] mb-4 text-center">Create New Collaboration</h2>
           <form method="POST" class="space-y-4">
@@ -406,7 +377,8 @@
               <input id="id_title" name="title" type="text"
                      value="{{ form.title.value|default:'' }}"
                      placeholder="Project Title"
-                     class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
+                     class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]"
+                     required />
             </div>
 
             <!-- Description -->
@@ -414,7 +386,54 @@
               <label for="id_description" class="text-sm font-medium text-muted">Description:</label>
               <textarea id="id_description" name="description" rows="4"
                         placeholder="Describe your project..."
-                        class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]">{{ form.description.value|default:'' }}</textarea>
+                        class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]"
+                        required>{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <!-- Project Type -->
+            <div class="space-y-1">
+              <label for="id_project_type" class="text-sm font-medium text-muted">Project Type:</label>
+              <input id="id_project_type" name="project_type" type="text"
+                     value="{{ form.project_type.value|default:'' }}"
+                     placeholder="e.g., Illustration, Book Cover, Fantasy Art"
+                     class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
+            </div>
+
+            <!-- Tags -->
+            <div class="space-y-1">
+              <label for="id_tags" class="text-sm font-medium text-muted">Tags:</label>
+              <input id="id_tags" name="tags" type="text"
+                     value="{{ form.tags.value|default:'' }}"
+                     placeholder="Comma-separated tags (e.g., Fantasy, Book Cover, Digital)"
+                     class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
+            </div>
+
+            <!-- Requirements -->
+            <div class="space-y-1">
+              <label for="id_requirements" class="text-sm font-medium text-muted">Requirements:</label>
+              <textarea id="id_requirements" name="requirements" rows="3"
+                        placeholder="List project requirements (one per line)"
+                        class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]">{{ form.requirements.value|default:'' }}</textarea>
+            </div>
+
+            <!-- Deadline & Budget Row -->
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Deadline -->
+              <div class="space-y-1">
+                <label for="id_deadline" class="text-sm font-medium text-muted">Deadline:</label>
+                <input id="id_deadline" name="deadline" type="date"
+                       value="{{ form.deadline.value|default:'' }}"
+                       class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
+              </div>
+
+              <!-- Budget -->
+              <div class="space-y-1">
+                <label for="id_budget" class="text-sm font-medium text-muted">Budget:</label>
+                <input id="id_budget" name="budget" type="text"
+                       value="{{ form.budget.value|default:'' }}"
+                       placeholder="e.g., $500, Revenue Share"
+                       class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
+              </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -466,4 +485,78 @@
 <script src="{% static 'js/dashboard.js' %}"></script>
 <script src="{% static 'js/favorites.js' %}"></script>
 <script src="{% static 'js/notifications.js' %}"></script>
+
+<script>
+  // Auto-scroll for Recent Uploads
+  (function() {
+    const scroller = document.getElementById('recentUploadsScroller');
+    if (!scroller) return;
+
+    let isScrolling = false;
+    let scrollInterval = null;
+    let idleTimeout = null;
+    const IDLE_DELAY = 3000; // 3 seconds of idle before auto-scroll starts
+    const SCROLL_SPEED = 0.5; // pixels per frame
+
+    function startAutoScroll() {
+      if (scrollInterval) return;
+      
+      scrollInterval = setInterval(() => {
+        if (isScrolling) return;
+
+        // Scroll down smoothly
+        scroller.scrollTop += SCROLL_SPEED;
+
+        // If reached bottom, scroll back to top
+        if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 5) {
+          setTimeout(() => {
+            scroller.scrollTop = 0;
+          }, 2000); // Pause at bottom for 2 seconds
+        }
+      }, 16); // ~60fps
+    }
+
+    function stopAutoScroll() {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+      }
+    }
+
+    function resetIdleTimer() {
+      isScrolling = true;
+      stopAutoScroll();
+      
+      if (idleTimeout) clearTimeout(idleTimeout);
+      
+      idleTimeout = setTimeout(() => {
+        isScrolling = false;
+        startAutoScroll();
+      }, IDLE_DELAY);
+    }
+
+    // Listen for user interaction
+    scroller.addEventListener('mouseenter', resetIdleTimer);
+    scroller.addEventListener('mousemove', resetIdleTimer);
+    scroller.addEventListener('scroll', resetIdleTimer);
+    scroller.addEventListener('wheel', resetIdleTimer);
+    scroller.addEventListener('touchstart', resetIdleTimer);
+    scroller.addEventListener('touchmove', resetIdleTimer);
+
+    // Start auto-scroll after initial idle period
+    idleTimeout = setTimeout(() => {
+      isScrolling = false;
+      startAutoScroll();
+    }, IDLE_DELAY);
+
+    // Stop when mouse leaves
+    scroller.addEventListener('mouseleave', () => {
+      if (idleTimeout) clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(() => {
+        isScrolling = false;
+        startAutoScroll();
+      }, IDLE_DELAY);
+    });
+  })();
+</script>
 {% endblock %}

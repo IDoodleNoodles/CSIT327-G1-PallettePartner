@@ -80,6 +80,27 @@
               <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Bio / About Me</div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB] whitespace-pre-wrap min-h-[80px]">{{ user.profile.bio|default:"Not set" }}</p>
             </div>
+
+            <div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Location</div>
+              <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.location|default:"Not set" }}</p>
+            </div>
+
+            <div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Hourly Rate</div>
+              <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.hourly_rate|default:"Not set" }}</p>
+            </div>
+
+            <div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Years Active</div>
+              <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.years_active|default:"Not set" }} {% if user.profile.years_active %}year{{ user.profile.years_active|pluralize }}{% endif %}</p>
+            </div>
+
+            <div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Availability</div>
+              <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.availability_status|default:"Not set" }}</p>
+            </div>
+
             <div class="md:col-span-2 flex justify-end mt-4">
               <a href="{% url 'pallate:edit_profile' %}"
                  class="inline-flex items-center justify-center bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base">

@@ -1,135 +1,221 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Artist Profile | PallettePartner{% endblock %}
+{% block title %}{% if show_single %}{{ artist_user.username }}{% else %}Discover Artists{% endif %} | PallettePartner{% endblock %}
 
 {% block content %}
-<!-- Artist Profile Header -->
-<section class="artist-header-section bg-card-dark py-6 px-6 rounded-xl shadow-md">
-    <!-- Top row: Back button on the left, page title centered/inline -->
-    <div class="flex items-center justify-between mb-4">
-        <a href="{% url 'pallate:dashboard' %}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#232B46] hover:bg-[#374151] text-text-light text-sm">
-            <span aria-hidden="true" class="text-lg">←</span>
-            <span>Back to Dashboard</span>
-        </a>
-        <h1 class="text-2xl md:text-3xl font-bold text-[#A7F3D0]">Artist Profile</h1>
-    </div>
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
 
-    <div class="artist-profile flex items-center gap-6">
-        {% if artist_profile and artist_profile.avatar %}
-          <img src="{{ artist_profile.avatar.url }}" alt="{{ artist_user.username }}" class="rounded-full border-4 border-accent-purple shadow-lg w-[120px] h-[120px] object-cover">
-        {% else %}
-          <img src="{% static 'icon/profile_icon.png' %}" alt="Avatar" class="rounded-full border-4 border-accent-purple shadow-lg w-[120px] h-[120px] object-contain p-4 bg-[#0D1426]">
-        {% endif %}
-        <div class="profile-details text-text-light">
-            <h1 class="text-3xl font-bold">{{ artist_user.get_full_name|default:artist_user.username }}</h1>
-            <p class="text-accent-indigo">{{ artist_profile.art_type|default:"Artist" }}</p>
-            <p class="flex items-center gap-2 text-gray-400 mt-1">
-                <i class="fas fa-map-marker-alt"></i> —
-            </p>
-            <div class="profile-stats flex gap-6 mt-4">
-                <div><span class="text-2xl font-bold">0</span><p class="text-sm text-gray-400">Followers</p></div>
-                <div><span class="text-2xl font-bold">0</span><p class="text-sm text-gray-400">Following</p></div>
-                <div><span class="text-2xl font-bold">{{ user_collaborations|length }}</span><p class="text-sm text-gray-400">Projects</p></div>
-                <div><span class="text-2xl font-bold">—</span><p class="text-sm text-gray-400">Rating</p></div>
+  {% include "pallate/_sidebar.html" %}
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto">
+    <!-- TOP BAR -->
+    <header class="flex items-center justify-between px-10 py-4 border-b border-[#111827]">
+      <div>
+        <p class="text-sm text-[#9CA3AF]">{% if show_single %}Artist Profile{% else %}Community{% endif %}</p>
+        <h1 class="text-xl font-semibold text-[#A7F3D0]">
+          {% if show_single %}{{ artist_user.get_full_name|default:artist_user.username }}{% else %}Discover Artists{% endif %}
+        </h1>
+      </div>
+
+      <form action="{% url 'pallate:logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit"
+                class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition">
+          Logout
+        </button>
+      </form>
+    </header>
+
+    {% if not show_single %}
+    <!-- DISCOVER ARTISTS VIEW -->
+    <section class="px-10 py-6">
+      <div class="mb-6">
+        <p class="text-[#9CA3AF]">Browse talented artists in the community</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for artist in artists %}
+        <div class="bg-[#0B1221] rounded-2xl border border-[#1F2937] shadow-xl overflow-hidden hover:border-[#8B5CF6] transition">
+          <div class="p-6">
+            <div class="flex items-center gap-4 mb-4">
+              {% if artist.profile.avatar %}
+              <img src="{{ artist.profile.avatar.url }}" alt="{{ artist.username }}" class="w-16 h-16 rounded-full border-2 border-[#A7F3D0]/20 object-cover">
+              {% else %}
+              <div class="w-16 h-16 rounded-full bg-[#232B46] flex items-center justify-center border-2 border-[#A7F3D0]/20">
+                <span class="text-xl font-bold text-[#9CA3AF]">{{ artist.username|first|upper }}</span>
+              </div>
+              {% endif %}
+              
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-bold text-white truncate">{{ artist.get_full_name|default:artist.username }}</h3>
+                <p class="text-sm text-[#A7F3D0] truncate">{{ artist.profile.art_type|default:"Artist" }}</p>
+                {% if artist.profile.location %}
+                <p class="text-xs text-[#9CA3AF] mt-1 truncate">📍 {{ artist.profile.location }}</p>
+                {% endif %}
+              </div>
             </div>
-        </div>
-        <div class="ml-auto flex gap-3">
-            <button class="btn-primary bg-accent-purple px-4 py-2 rounded-lg hover:bg-accent-indigo">Follow</button>
-            <a href="{% url 'pallate:dashboard' %}" class="btn-secondary border border-accent-purple px-4 py-2 rounded-lg hover:bg-accent-indigo">Message</a>
-            <button class="btn-icon text-gray-300 hover:text-accent-purple" aria-label="Share profile"><i class="fas fa-share"></i></button>
-        </div>
-    </div>
-</section>
-
-<!-- Main Profile Content -->
-<main class="main-content">
-    <div class="container">
-    <div class="profile-main grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
-    <!-- Sidebar -->
-    <aside class="profile-sidebar bg-card-dark p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold mb-3">About</h3>
-    <p class="text-gray-300 mb-4">{{ artist_profile.bio|default:"This artist hasn't written a bio yet." }}</p>
-        <ul class="space-y-2 text-gray-400 text-sm">
-            <li><i class="fas fa-map-marker-alt mr-2"></i> San Francisco, CA</li>
-            <li><i class="fas fa-calendar mr-2"></i> 8 years active</li>
-            <li><i class="fas fa-clock mr-2"></i> Available for projects</li>
-            <li><i class="fas fa-dollar-sign mr-2"></i> $50-150/hour</li>
-        </ul>
-
-        <h3 class="text-lg font-semibold mt-6 mb-3">Skills & Interests</h3>
-                <div class="flex flex-wrap gap-2">
-                        {% if artist_profile.art_type %}
-                            <span class="tag bg-accent-purple text-white px-2 py-1 rounded">{{ artist_profile.art_type }}</span>
-                        {% else %}
-                            <span class="tag bg-card-dark border px-2 py-1 rounded">No skills listed</span>
-                        {% endif %}
-                </div>
-
-        <h3 class="text-lg font-semibold mt-6 mb-3">Recent Activity</h3>
-        <div class="space-y-2 text-sm text-gray-400">
-            <p><i class="fas fa-heart text-red-400 mr-2"></i>Liked "Fantasy Book Cover Design"</p>
-            <p><i class="fas fa-comment text-blue-400 mr-2"></i>Commented on "Urban Photography Series"</p>
-            <p><i class="fas fa-plus text-green-400 mr-2"></i>Joined "Short Film Animation"</p>
-        </div>
-    </aside>
-
-    <!-- Portfolio + Collaborations -->
-    <div class="profile-content md:col-span-2 space-y-10">
-        <section class="portfolio-section">
-            <h2 class="text-xl font-bold mb-4">Portfolio</h2>
-            <div class="portfolio-filters flex gap-3 mb-6">
-                <button class="filter-btn bg-accent-purple text-white px-3 py-1 rounded">All</button>
-                <button class="filter-btn bg-card-dark hover:bg-accent-indigo px-3 py-1 rounded">Character Design</button>
-                <button class="filter-btn bg-card-dark hover:bg-accent-indigo px-3 py-1 rounded">Environment</button>
-            </div>
-                        {% if artworks %}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {% for artwork in artworks %}
-                                    <div class="bg-card-dark rounded-lg overflow-hidden border border-[#232B46]">
-                                        {% if artwork.image %}
-                                            <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-40 object-cover">
-                                        {% endif %}
-                                        <div class="p-3 flex items-center justify-between">
-                                            <h4 class="font-semibold">{{ artwork.title }}</h4>
-                                            <a href="{% url 'pallate:toggle_favorite' artwork.id %}" class="hover:opacity-80 transition" title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}">
-                                                {% if artwork.id in user_favorites %}<span class="text-xl">❤️</span>{% else %}<span class="text-xl">🤍</span>{% endif %}
-                                            </a>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center text-[#9CA3AF] border border-[#232B46] rounded-xl py-8 bg-[#111827]">No artworks yet.</div>
-                        {% endif %}
-        </section>
-
-        <section class="collaborations-section">
-            <h2 class="text-xl font-bold mb-4">Active Collaborations</h2>
             
-                        <div class="space-y-4">
-                            {% if user_collaborations %}
-                                {% for collab in user_collaborations %}
-                                    <div class="collaboration-item bg-card-dark p-4 rounded-lg flex justify-between items-center border border-[#232B46]">
-                                        <div>
-                                            <h4 class="font-semibold text-white">{{ collab.title }}</h4>
-                                            <p class="text-sm text-gray-400">By {{ collab.user.username }} • {{ collab.created_at|timesince }} ago</p>
-                                        </div>
-                                        <div class="flex gap-3">
-                                            <a href="{% url 'pallate:collaboration_detail' collab.id %}" class="btn-outline border border-accent-purple px-3 py-1 rounded hover:bg-accent-purple">View</a>
-                                            <a href="{% url 'pallate:collab_messages' collab.id %}" class="btn-outline border border-accent-purple px-3 py-1 rounded hover:bg-accent-purple">Chat</a>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-[#9CA3AF]">No collaborations yet.</div>
-                            {% endif %}
-                        </div>
-        </section>
-    </div>
-    </div>
-</main>
+            {% if artist.profile.bio %}
+            <p class="text-sm text-[#D1D5DB] mb-4 line-clamp-2">{{ artist.profile.bio }}</p>
+            {% endif %}
+            
+            <div class="flex gap-4 text-xs text-[#9CA3AF] mb-4">
+              <span>🎨 {{ artist.artwork_count }} artwork{{ artist.artwork_count|pluralize }}</span>
+              <span>🤝 {{ artist.collab_count }} project{{ artist.collab_count|pluralize }}</span>
+            </div>
+            
+            <!-- Recent Uploads (Scrollable) -->
+            {% if artist.recent_artworks %}
+            <div class="mb-4">
+              <p class="text-xs font-semibold text-[#A7F3D0] mb-2">Recent Uploads</p>
+              <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-[#1F2937]">
+                {% for artwork in artist.recent_artworks %}
+                {% if artwork.image %}
+                <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-[#1F2937]">
+                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-full object-cover">
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            
+            <a href="{% url 'pallate:artist_profile_by_id' artist.id %}" 
+               class="block w-full text-center bg-[#8B5CF6] hover:bg-[#7C3AED] text-white py-2 rounded-lg font-semibold transition">
+              View Profile
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% else %}
+    <!-- SINGLE ARTIST VIEW (when user_id is provided) -->
+    <section class="px-10 py-6">
+      <a href="{% url 'pallate:artist_profile' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] mb-4">
+        <span>←</span> Back to Discover
+      </a>
+      
+      <div class="bg-[#0B1221] rounded-3xl border border-[#1F2937] shadow-2xl p-8">
+        <div class="flex items-start gap-6 mb-8">
+          {% if artist_profile and artist_profile.avatar %}
+            <img src="{{ artist_profile.avatar.url }}" alt="{{ artist_user.username }}" class="w-32 h-32 rounded-full border-4 border-[#A7F3D0]/20 object-cover">
+          {% else %}
+            <div class="w-32 h-32 rounded-full bg-[#232B46] flex items-center justify-center border-4 border-[#A7F3D0]/20">
+              <span class="text-4xl font-bold text-[#9CA3AF]">{{ artist_user.username|first|upper }}</span>
+            </div>
+          {% endif %}
+          
+          <div class="flex-1">
+            <h2 class="text-3xl font-bold text-white">{{ artist_user.get_full_name|default:artist_user.username }}</h2>
+            <p class="text-[#A7F3D0] mt-1">{{ artist_profile.art_type|default:"Artist" }}</p>
+            {% if artist_profile.location %}
+            <p class="text-[#9CA3AF] text-sm mt-2">📍 {{ artist_profile.location }}</p>
+            {% endif %}
+            
+            <div class="flex gap-8 mt-4">
+              <div><span class="text-2xl font-bold text-white">{{ artworks|length }}</span><p class="text-sm text-[#9CA3AF]">Artworks</p></div>
+              <div><span class="text-2xl font-bold text-white">{{ user_collaborations|length }}</span><p class="text-sm text-[#9CA3AF]">Projects</p></div>
+              {% if artist_profile.years_active %}
+              <div><span class="text-2xl font-bold text-white">{{ artist_profile.years_active }}</span><p class="text-sm text-[#9CA3AF]">Years Active</p></div>
+              {% endif %}
+            </div>
+            
+            {% if artist_profile.bio %}
+            <p class="text-[#D1D5DB] mt-4">{{ artist_profile.bio }}</p>
+            {% endif %}
+          </div>
+          
+          <div class="flex gap-3">
+            <button class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-4 py-2 rounded-lg transition">Follow</button>
+            <a href="{% url 'pallate:dashboard' %}" class="bg-[#232B46] hover:bg-[#374151] text-white px-4 py-2 rounded-lg transition">Message</a>
+          </div>
+        </div>
+        
+        <!-- Artist Details -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#1F2937]">
+          <div class="md:col-span-1 space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold text-white mb-3">About</h3>
+              <ul class="space-y-2 text-sm text-[#9CA3AF]">
+                {% if artist_profile.location %}
+                <li>📍 {{ artist_profile.location }}</li>
+                {% endif %}
+                {% if artist_profile.years_active %}
+                <li>📅 {{ artist_profile.years_active }} year{{ artist_profile.years_active|pluralize }} active</li>
+                {% endif %}
+                {% if artist_profile.availability_status %}
+                <li>🕒 {{ artist_profile.availability_status }}</li>
+                {% endif %}
+                {% if artist_profile.hourly_rate %}
+                <li>💰 {{ artist_profile.hourly_rate }}</li>
+                {% endif %}
+              </ul>
+            </div>
+            
+            {% if artist_profile.interests %}
+            <div>
+              <h3 class="text-lg font-semibold text-white mb-3">Skills & Interests</h3>
+              <div class="flex flex-wrap gap-2">
+                {% for interest in artist_profile.get_interests_list %}
+                <span class="px-3 py-1 rounded-full text-xs bg-[#8B5CF6]/20 text-[#E9D5FF] border border-[#8B5CF6]/30">{{ interest }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="md:col-span-2 space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold text-white mb-4">Portfolio</h3>
+              {% if artworks %}
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
+                {% for artwork in artworks %}
+                <div class="bg-[#050819] rounded-lg overflow-hidden border border-[#1F2937] hover:border-[#8B5CF6] transition">
+                  {% if artwork.image %}
+                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-40 object-cover">
+                  {% endif %}
+                  <div class="p-3">
+                    <h4 class="font-semibold text-white text-sm">{{ artwork.title }}</h4>
+                    <p class="text-xs text-[#9CA3AF] mt-1">{{ artwork.created_at|timesince }} ago</p>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-[#9CA3AF]">No artworks yet.</p>
+              {% endif %}
+            </div>
+            
+            <div>
+              <h3 class="text-lg font-semibold text-white mb-4">Active Collaborations</h3>
+              {% if user_collaborations %}
+              <div class="space-y-3">
+                {% for collab in user_collaborations %}
+                <div class="bg-[#050819] p-4 rounded-lg border border-[#1F2937] flex justify-between items-center">
+                  <div>
+                    <h4 class="font-semibold text-white">{{ collab.title }}</h4>
+                    <p class="text-sm text-[#9CA3AF]">{{ collab.created_at|timesince }} ago</p>
+                  </div>
+                  <a href="{% url 'pallate:collaboration_detail' collab.id %}" class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-3 py-1 rounded text-sm">View</a>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-[#9CA3AF]">No collaborations yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </main>
+</div>
 {% endblock %}
+
 {% block extra_scripts %}
 <script src="{% static 'js/favorites.js' %}"></script>
 {% endblock %}

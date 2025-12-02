@@ -2,7 +2,11 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
-from .models import Collaboration, Profile, Artwork, Message, ArtworkComment, CollaborationFeedback
+from .models import (
+    Collaboration, Profile, Artwork, Message, ArtworkComment, 
+    CollaborationFeedback, CollaborationRole, CollaborationApplication,
+    CollaborationFile, CollaborationTask
+)
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label="First Name")
@@ -39,16 +43,37 @@ class RegisterForm(UserCreationForm):
 class CollaborationForm(forms.ModelForm):
     class Meta:
         model = Collaboration
-        fields = ['title', 'description']
+        fields = ['title', 'description', 'project_type', 'tags', 'requirements', 'deadline', 'budget']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Project Title',
-                'class': 'input-field'
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
             }),
             'description': forms.Textarea(attrs={
-                'placeholder': 'Describe your project...',
-                'class': 'textarea-field',
+                'placeholder': 'Describe your project in detail...',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
                 'rows': 4
+            }),
+            'project_type': forms.TextInput(attrs={
+                'placeholder': 'e.g., Illustration, Book Cover, Fantasy Art',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'tags': forms.TextInput(attrs={
+                'placeholder': 'Comma-separated tags (e.g., Fantasy, Book Cover, Digital)',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'requirements': forms.Textarea(attrs={
+                'placeholder': 'List project requirements (one per line)',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 3
+            }),
+            'deadline': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'budget': forms.TextInput(attrs={
+                'placeholder': 'e.g., $500, Revenue Share, Portfolio Credit',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
             })
         }
 
@@ -128,7 +153,7 @@ class ProfileForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = ['avatar', 'art_type', 'portfolio', 'bio', 'interests', 'security_question', 'security_answer']
+        fields = ['avatar', 'art_type', 'portfolio', 'bio', 'interests', 'location', 'hourly_rate', 'years_active', 'availability_status', 'security_question', 'security_answer']
         
         # Reusable CSS class for input fields
         input_class = 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
@@ -155,6 +180,23 @@ class ProfileForm(forms.ModelForm):
                 'placeholder': 'e.g., Fantasy Art, Portraits, Digital Painting, Character Design',
                 'class': input_class,
                 'rows': 3
+            }),
+            'location': forms.TextInput(attrs={
+                'placeholder': 'e.g., San Francisco, CA',
+                'class': input_class
+            }),
+            'hourly_rate': forms.TextInput(attrs={
+                'placeholder': 'e.g., $50-150/hour',
+                'class': input_class
+            }),
+            'years_active': forms.NumberInput(attrs={
+                'placeholder': 'e.g., 5',
+                'class': input_class,
+                'min': '0'
+            }),
+            'availability_status': forms.TextInput(attrs={
+                'placeholder': 'e.g., Available for projects',
+                'class': input_class
             })
         }
         labels = {
@@ -162,7 +204,11 @@ class ProfileForm(forms.ModelForm):
             'art_type': 'Art Type',
             'portfolio': 'Portfolio URL',
             'bio': 'Bio',
-            'interests': 'Interests (comma-separated)'
+            'interests': 'Interests (comma-separated)',
+            'location': 'Location',
+            'hourly_rate': 'Hourly Rate',
+            'years_active': 'Years Active',
+            'availability_status': 'Availability Status'
         }
     
     def __init__(self, *args, **kwargs):
@@ -350,3 +396,106 @@ class NewPasswordForm(forms.Form):
                 raise forms.ValidationError('Password must be at least 8 characters.')
         
         return cleaned_data
+
+
+class CollaborationRoleForm(forms.ModelForm):
+    class Meta:
+        model = CollaborationRole
+        fields = ['title', 'description', 'skills_required', 'compensation', 'time_commitment']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'e.g., Lead Illustrator, Color Specialist',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'What will this role be responsible for?',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 3
+            }),
+            'skills_required': forms.TextInput(attrs={
+                'placeholder': 'e.g., Digital Painting, Character Design, Adobe Photoshop',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'compensation': forms.TextInput(attrs={
+                'placeholder': 'e.g., $2,800, Revenue Share, Portfolio Credit',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'time_commitment': forms.TextInput(attrs={
+                'placeholder': 'e.g., 3 weeks, 1 week, Full cover set',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            })
+        }
+
+
+class CollaborationApplicationForm(forms.ModelForm):
+    class Meta:
+        model = CollaborationApplication
+        fields = ['message', 'portfolio_link']
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'placeholder': 'Tell us why you\'re interested and share your relevant experience...',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 5
+            }),
+            'portfolio_link': forms.URLInput(attrs={
+                'placeholder': 'https://your-portfolio.com (optional)',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            })
+        }
+
+
+class CollaborationFileForm(forms.ModelForm):
+    class Meta:
+        model = CollaborationFile
+        fields = ['title', 'description', 'file', 'file_type']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'File title',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Optional description',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 2
+            }),
+            'file': forms.FileInput(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'file_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            })
+        }
+
+
+class CollaborationTaskForm(forms.ModelForm):
+    class Meta:
+        model = CollaborationTask
+        fields = ['title', 'description', 'assigned_to', 'status', 'due_date']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Task title',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Task details',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 3
+            }),
+            'assigned_to': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            }),
+            'due_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+            })
+        }
+    
+    def __init__(self, *args, collaboration=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if collaboration:
+            # Only show collaboration members in assigned_to dropdown
+            members = collaboration.get_members()
+            self.fields['assigned_to'].queryset = User.objects.filter(id__in=[m.id for m in members])
