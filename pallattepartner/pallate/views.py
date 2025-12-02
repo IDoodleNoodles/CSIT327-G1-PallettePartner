@@ -86,7 +86,7 @@ def dashboard(request):
     # Collab posts
     posts = (
         Collaboration.objects
-        .select_related('user')
+        .select_related('owner')
         .order_by('-created_at')
     )
 
@@ -120,7 +120,7 @@ def dashboard(request):
         form = CollaborationForm(request.POST)
         if form.is_valid():
             new_post = form.save(commit=False)
-            new_post.user = request.user
+            new_post.owner = request.user
             new_post.save()
             return redirect('pallate:dashboard')
     else:
@@ -170,26 +170,40 @@ def notifications_list(request):
 # Artist Profile (view another user's public profile)
 @login_required(login_url='pallate:login')
 def artist_profile(request, user_id=None):
+    """Discover Artists page - shows all artists with their recent work"""
     from django.contrib.auth.models import User
-    target_user_id = user_id or request.GET.get('user')
-    if not target_user_id:
-        target_user = request.user
-    else:
-        target_user = get_object_or_404(User, pk=target_user_id)
-
-    # Fetch related data
-    artist_profile = getattr(target_user, 'profile', None)
-    artworks = Artwork.objects.filter(user=target_user).order_by('-created_at')
-    user_collaborations = Collaboration.objects.filter(user=target_user).order_by('-created_at')
-
-    user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
-
+    from django.db.models import Count, Prefetch
+    
+    # Get all users with their profiles and recent artworks
+    artists = User.objects.select_related('profile').prefetch_related(
+        Prefetch('artworks', queryset=Artwork.objects.order_by('-created_at')[:3], to_attr='recent_artworks')
+    ).annotate(
+        artwork_count=Count('artworks'),
+        collab_count=Count('owned_collaborations')
+    ).filter(is_active=True).order_by('-date_joined')
+    
+    # If user_id is provided, show that specific artist
+    if user_id:
+        target_user = get_object_or_404(User, pk=user_id)
+        artist_profile = getattr(target_user, 'profile', None)
+        artworks = Artwork.objects.filter(user=target_user).order_by('-created_at')
+        user_collaborations = Collaboration.objects.filter(owner=target_user).order_by('-created_at')
+        user_favorites = Favorite.objects.filter(user=request.user).values_list('artwork_id', flat=True)
+        
+        context = {
+            'artist_user': target_user,
+            'artist_profile': artist_profile,
+            'artworks': artworks,
+            'user_collaborations': user_collaborations,
+            'user_favorites': user_favorites,
+            'show_single': True,
+        }
+        return render(request, 'pallate/artist_profile.html', context)
+    
+    # Show all artists (discover mode)
     context = {
-        'artist_user': target_user,
-        'artist_profile': artist_profile,
-        'artworks': artworks,
-        'user_collaborations': user_collaborations,
-        'user_favorites': user_favorites,
+        'artists': artists,
+        'show_single': False,
     }
     return render(request, 'pallate/artist_profile.html', context)
 
@@ -232,10 +246,19 @@ def collaboration_detail(request, pk=None):
 
     owner = collab.user
     owner_profile = getattr(owner, 'profile', None)
+    
+    # Get all collaboration opportunities excluding the current one
+    all_posts = Collaboration.objects.select_related('owner').exclude(pk=collab.pk).order_by('-created_at')
+    
+    # Get roles for this collaboration
+    roles = collab.roles.select_related('filled_by').all()
+    
     context = {
         'collaboration': collab,
         'owner': owner,
         'owner_profile': owner_profile,
+        'all_posts': all_posts,
+        'roles': roles,
     }
     return render(request, 'pallate/collaboration_detail.html', context)
 
@@ -251,7 +274,7 @@ def account(request):
 def profile_view(request):
     profile = request.user.profile
     user_artworks = Artwork.objects.filter(user=request.user).order_by('-created_at')
-    user_collaborations = Collaboration.objects.filter(user=request.user).order_by('-created_at')
+    user_collaborations = Collaboration.objects.filter(owner=request.user).order_by('-created_at')
     return render(request, 'pallate/profile.html', {
         'profile': profile,
         'user_artworks': user_artworks,
@@ -583,7 +606,7 @@ def collaboration_matches(request, collaboration_id):
     
     if not existing_matches.exists():
         # Generate matches based on collaboration owner's profile
-        owner_profile = collaboration.user.profile
+        owner_profile = collaboration.owner.profile
         potential_users = User.objects.exclude(id=request.user.id).select_related('profile')
         
         for user in potential_users:
