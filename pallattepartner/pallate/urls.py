@@ -12,6 +12,7 @@ urlpatterns = [
     path('welcome/', views.welcome, name='welcome'),
     path('account/', views.account, name='account'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('search/', views.search, name='search'),
     path('artist-profile/', views.artist_profile, name='artist_profile'),  # supports ?user=
     path('artist/<int:user_id>/', views.artist_profile, name='artist_profile_by_id'),
     path('collaboration-detail/', views.collaboration_detail, name='collaboration_detail_legacy'),

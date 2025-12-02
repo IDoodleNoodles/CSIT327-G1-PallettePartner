@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.auth.models import User
 
 from .forms import (
@@ -317,6 +317,52 @@ def toggle_favorite(request, artwork_id):
         return JsonResponse({'favorited': favorited})
     
     return redirect('pallate:dashboard')
+
+
+# Search View
+@login_required
+def search(request):
+    query = request.GET.get('q', '').strip()
+    
+    artworks = []
+    artists = []
+    
+    if query:
+        # Search artworks by title or description
+        artworks = (
+            Artwork.objects
+            .filter(
+                Q(title__icontains=query) | 
+                Q(description__icontains=query)
+            )
+            .select_related('user')
+            .annotate(comment_count=Count('comments'))
+            .order_by('-created_at')
+        )
+        
+        # Search users by username or profile details
+        artists = (
+            User.objects
+            .filter(
+                Q(username__icontains=query) |
+                Q(profile__bio__icontains=query) |
+                Q(profile__art_type__icontains=query)
+            )
+            .select_related('profile')
+            .distinct()
+        )
+    
+    # Get user's favorites for the heart icon display
+    user_favorites = Favorite.objects.filter(
+        user=request.user
+    ).values_list('artwork_id', flat=True)
+    
+    return render(request, 'pallate/search_results.html', {
+        'query': query,
+        'artworks': artworks,
+        'artists': artists,
+        'user_favorites': user_favorites,
+    })
 
 
 @login_required

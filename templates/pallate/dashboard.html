@@ -75,12 +75,14 @@
           <span class="text-white">Palette</span><span class="text-[#8B5CF6]">Partners</span>
         </div>
 
-        <div class="flex items-center w-full max-w-xl bg-card-dark border border-border-dark rounded-md px-4 py-2 shadow">
+        <form method="get" action="{% url 'pallate:search' %}" class="flex items-center w-full max-w-xl bg-card-dark border border-border-dark rounded-md px-4 py-2 shadow">
           <img src="{% static 'icon/search_icon.png' %}"
                class="w-4 h-4 opacity-80 mr-2 invert" alt="">
-          <input type="text" placeholder="Search projects, artist"
+          <input type="text" 
+                 name="q" 
+                 placeholder="Search projects, artist"
                  class="bg-transparent text-sm w-full text-text-light placeholder-muted focus:outline-none">
-        </div>
+        </form>
       </div>
 
       <div class="flex items-center gap-4">
