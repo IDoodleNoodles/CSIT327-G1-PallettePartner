@@ -133,9 +133,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [ 
     BASE_DIR / "static",
 ]
-# Directory where `collectstatic` will gather static files for production.
-# Required by Django's collectstatic when using the staticfiles app on servers like Render.
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
 
@@ -176,9 +174,6 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
 # ===========================
 # SUPABASE STORAGE CONFIGURATION
 # ===========================
@@ -206,9 +201,15 @@ if USE_SUPABASE_STORAGE:
         'CacheControl': 'max-age=86400',  # Cache for 1 day
     }
     
-    # Use custom storage backends
-    DEFAULT_FILE_STORAGE = 'pallattepartner.pallate.storage.SupabaseMediaStorage'
-    STATICFILES_STORAGE = 'pallattepartner.pallate.storage.SupabaseStaticStorage'
+    # Use custom storage backends (Django 4.2+ STORAGES setting)
+    STORAGES = {
+        "default": {
+            "BACKEND": "pallattepartner.pallate.storage.SupabaseMediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "pallattepartner.pallate.storage.SupabaseStaticStorage",
+        },
+    }
     
     # Update URLs to use Supabase
     MEDIA_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET_NAME}/media/"
@@ -217,6 +218,9 @@ if USE_SUPABASE_STORAGE:
     print("✅ Using Supabase Storage for media and static files")
 else:
     # Development: use local file system
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
     print("📁 Using local file system for media and static files")
 
 # Whitenoise for serving static files in production (fallback if not using Supabase for static)
