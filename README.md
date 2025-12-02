@@ -2,28 +2,82 @@
 - PallettePartner is a web-based platform designed to connect traditional and digital artists for creative collaboration. The system enables users to create detailed profiles, post collaboration requests, and receive suggested matches based on shared artistic interests.
 
 ## Tech stack used
-- Backend: Python 3.10+, Django (Django REST or standard views where used)
-- Database: SQLite (development), compatible with PostgreSQL for production
-- Frontend: Django templates, Tailwind CSS (CDN or built assets), vanilla JavaScript modules
-- Storage/Assets: Django static files (static/), media uploads via MEDIA settings
-- Dev tooling: pip, virtualenv, manage.py, optional Node.js for Tailwind build
+- Backend: Python 3.10+, Django 5.2.7
+- Database: PostgreSQL (Supabase)
+- Frontend: Django templates, Tailwind CSS (CDN), vanilla JavaScript modules
+- Storage: Local file system (development), Supabase Storage (production)
+- File Storage Backend: django-storages with boto3 (S3-compatible)
+- Dev tooling: pip, virtualenv, manage.py
 
 ## Setup & run instructions
+
+### Development Setup (Local)
 1. Clone repository and open the project folder:
-   - Windows (PowerShell/CMD):
-     - git clone <repo-url>
-     - go to the repository folder
+   ```bash
+   git clone <repo-url>
+   cd CSIT327-G1-PallettePartner
+   ```
+
 2. Create and activate virtual environment:
-   - python -m venv venv
-   - venv\Scripts\Activate.ps1
+   - **Windows (PowerShell)**:
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\Activate.ps1
+     ```
+   - **macOS/Linux**:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+
 3. Install dependencies:
-    - pip install -r requirements.txt
-4. Apply migrations:
-   - python manage.py migrate
-5. Run development server:
-   - python manage.py runserver
-6. Open browser:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+5. Apply migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+6. Run development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+7. Open browser:
    - http://127.0.0.1:8000
+
+### Production Deployment (Supabase Storage)
+
+For deploying with Supabase Storage for user uploads and static files:
+
+1. **Quick Setup** (Automated):
+   - **Windows**: Run `.\setup_storage.ps1`
+   - **macOS/Linux**: Run `./setup_storage.sh`
+
+2. **Manual Setup**:
+   - Follow the comprehensive guide in `DEPLOYMENT.md`
+   - Configure Supabase Storage bucket
+   - Set environment variables
+   - Deploy to Render or your hosting platform
+
+3. **Key Features**:
+   - ✅ User uploads stored in Supabase Storage (avatars, artworks, chat images)
+   - ✅ Static files (CSS, JS, icons) served from Supabase
+   - ✅ Automatic file persistence across deployments
+   - ✅ Scalable storage for production use
+
+**Documentation**:
+- `DEPLOYMENT.md` - Complete deployment guide
+- `SUPABASE_STORAGE_IMPLEMENTATION.md` - Technical implementation details
+- `.env.example` - Environment variable template
 
 ## The Team/Creators
 - Michael C. Gelera - Project Owner - michael.gelera@cit.edu

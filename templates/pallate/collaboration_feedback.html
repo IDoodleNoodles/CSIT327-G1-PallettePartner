@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Collaboration Feedback | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#050819] text-[#E5E7EB]">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="{% url 'pallate:collaboration_detail' collaboration.id %}" 
+         class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-white mb-4">
+        <span class="text-xl">←</span>
+        <span>Back to Collaboration</span>
+      </a>
+      <h1 class="text-3xl font-bold text-white mb-2">Collaboration Feedback</h1>
+      <h2 class="text-xl text-gray-400">{{ collaboration.title }}</h2>
+    </div>
+
+    <!-- Average Rating -->
+    {% if all_feedbacks %}
+    <div class="bg-[#1A2035] rounded-lg p-6 mb-6 border border-[#232B46] text-center">
+      <div class="text-5xl font-bold text-[#A7F3D0] mb-2">{{ avg_rating }}</div>
+      <div class="text-gray-400">Average Rating ({{ all_feedbacks|length }} review{{ all_feedbacks|length|pluralize }})</div>
+      <div class="flex justify-center gap-1 mt-3">
+        {% for i in "12345" %}
+          {% if forloop.counter <= avg_rating %}
+            <span class="text-yellow-400 text-2xl">★</span>
+          {% else %}
+            <span class="text-gray-600 text-2xl">★</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Feedback Form -->
+    <div class="bg-[#1A2035] rounded-lg p-6 mb-6 border border-[#232B46]">
+      <h3 class="text-xl font-semibold text-white mb-4">
+        {% if existing_feedback %}Update Your Feedback{% else %}Submit Your Feedback{% endif %}
+      </h3>
+      
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Rating -->
+        <div>
+          <label class="block text-[#A7F3D0] font-semibold mb-3">{{ form.rating.label }}</label>
+          <div class="flex gap-4">
+            {% for value, label in form.rating.field.choices %}
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" name="rating" value="{{ value }}" 
+                     {% if form.rating.value == value|stringformat:"s" %}checked{% endif %}
+                     class="hidden peer">
+              <div class="flex flex-col items-center p-3 rounded-lg border-2 border-gray-700 peer-checked:border-[#8B5CF6] peer-checked:bg-[#232B46] hover:border-gray-500 transition">
+                <span class="text-3xl mb-1">
+                  {% if value == 5 %}😍{% elif value == 4 %}😊{% elif value == 3 %}😐{% elif value == 2 %}😕{% else %}😞{% endif %}
+                </span>
+                <span class="text-sm font-semibold">{{ value }}</span>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.rating.errors %}
+            <p class="text-red-400 text-sm mt-2">{{ form.rating.errors.0 }}</p>
+          {% endif %}
+        </div>
+        
+        <!-- Comment -->
+        <div>
+          <label for="{{ form.comment.id_for_label }}" class="block text-[#A7F3D0] font-semibold mb-2">
+            {{ form.comment.label }}
+          </label>
+          {{ form.comment }}
+          {% if form.comment.errors %}
+            <p class="text-red-400 text-sm mt-2">{{ form.comment.errors.0 }}</p>
+          {% endif %}
+        </div>
+        
+        <!-- Submit -->
+        <div class="flex gap-3">
+          <button type="submit" 
+                  class="bg-[#8B5CF6] hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+            {% if existing_feedback %}Update Feedback{% else %}Submit Feedback{% endif %}
+          </button>
+          <a href="{% url 'pallate:collaboration_detail' collaboration.id %}" 
+             class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- All Feedbacks -->
+    {% if all_feedbacks %}
+    <div class="bg-[#1A2035] rounded-lg p-6 border border-[#232B46]">
+      <h3 class="text-xl font-semibold text-white mb-4">All Reviews</h3>
+      <div class="space-y-4">
+        {% for feedback in all_feedbacks %}
+        <div class="border-b border-gray-700 pb-4 last:border-b-0">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <img src="{{ feedback.reviewer.profile.avatar.url }}" 
+                   alt="{{ feedback.reviewer.username }}"
+                   class="w-10 h-10 rounded-full object-cover">
+              <div>
+                <div class="font-semibold text-white">{{ feedback.reviewer.get_full_name|default:feedback.reviewer.username }}</div>
+                <div class="text-sm text-gray-400">{{ feedback.created_at|date:"M d, Y" }}</div>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              {% for i in "12345" %}
+                {% if forloop.counter <= feedback.rating %}
+                  <span class="text-yellow-400 text-lg">★</span>
+                {% else %}
+                  <span class="text-gray-600 text-lg">★</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% if feedback.comment %}
+          <p class="text-gray-300 text-sm mt-2">{{ feedback.comment }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+  </div>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.auth.models import User
 
 from .forms import (
@@ -15,6 +15,10 @@ from .forms import (
     ArtworkForm,
     MessageForm,
     ArtworkCommentForm,
+    CollaborationFeedbackForm,
+    PasswordResetRequestForm,
+    SecurityQuestionAnswerForm,
+    NewPasswordForm,
 )
 
 from .models import (
@@ -25,6 +29,9 @@ from .models import (
     Favorite,
     ArtworkComment,
     Notification,
+    CollaborationFeedback,
+    CollaborationMatch,
+    Profile,
 )
 from pallattepartner.pallate import models
 
@@ -259,7 +266,16 @@ def edit_profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
+            # Save profile but don't commit yet
+            profile_instance = form.save(commit=False)
+            
+            # Hash security answer if provided
+            security_answer = form.cleaned_data.get('security_answer')
+            if security_answer:
+                from django.contrib.auth.hashers import make_password
+                profile_instance.security_answer = make_password(security_answer)
+            
+            profile_instance.save()
             
             # If password was changed, update the session to keep user logged in
             password = form.cleaned_data.get('password')
@@ -319,6 +335,52 @@ def toggle_favorite(request, artwork_id):
     return redirect('pallate:dashboard')
 
 
+# Search View
+@login_required
+def search(request):
+    query = request.GET.get('q', '').strip()
+    
+    artworks = []
+    artists = []
+    
+    if query:
+        # Search artworks by title or description
+        artworks = (
+            Artwork.objects
+            .filter(
+                Q(title__icontains=query) | 
+                Q(description__icontains=query)
+            )
+            .select_related('user')
+            .annotate(comment_count=Count('comments'))
+            .order_by('-created_at')
+        )
+        
+        # Search users by username or profile details
+        artists = (
+            User.objects
+            .filter(
+                Q(username__icontains=query) |
+                Q(profile__bio__icontains=query) |
+                Q(profile__art_type__icontains=query)
+            )
+            .select_related('profile')
+            .distinct()
+        )
+    
+    # Get user's favorites for the heart icon display
+    user_favorites = Favorite.objects.filter(
+        user=request.user
+    ).values_list('artwork_id', flat=True)
+    
+    return render(request, 'pallate/search_results.html', {
+        'query': query,
+        'artworks': artworks,
+        'artists': artists,
+        'user_favorites': user_favorites,
+    })
+
+
 @login_required
 def collab_messages(request, pk):
     collaboration = get_object_or_404(Collaboration, pk=pk)
@@ -368,4 +430,298 @@ def collab_messages(request, pk):
         'messages': messages_qs,
         'participants': participants,
         'form': form,
+    })
+
+
+# ============================================
+# NEW FEATURES: Matching, Feedback, Featured
+# ============================================
+
+@login_required
+def find_collaborators(request):
+    """Find and suggest potential collaborators based on art_type and interests"""
+    current_profile = request.user.profile
+    
+    # Get all users except current user
+    potential_matches = []
+    all_users = User.objects.exclude(id=request.user.id).select_related('profile')
+    
+    for user in all_users:
+        if hasattr(user, 'profile'):
+            profile = user.profile
+            match_score = 0
+            match_reasons = []
+            
+            # Check art_type match
+            if current_profile.art_type and profile.art_type:
+                if current_profile.art_type.lower() in profile.art_type.lower() or \
+                   profile.art_type.lower() in current_profile.art_type.lower():
+                    match_score += 50
+                    match_reasons.append(f"Matching art type: {profile.art_type}")
+            
+            # Check interests overlap
+            current_interests = set(i.lower() for i in current_profile.get_interests_list())
+            user_interests = set(i.lower() for i in profile.get_interests_list())
+            common_interests = current_interests & user_interests
+            
+            if common_interests:
+                match_score += len(common_interests) * 20
+                match_reasons.append(f"Common interests: {', '.join(common_interests)}")
+            
+            # Only include users with some match
+            if match_score > 0:
+                potential_matches.append({
+                    'user': user,
+                    'profile': profile,
+                    'match_score': match_score,
+                    'match_reasons': match_reasons,
+                    'artworks_count': Artwork.objects.filter(user=user).count(),
+                })
+    
+    # Sort by match score
+    potential_matches.sort(key=lambda x: x['match_score'], reverse=True)
+    
+    return render(request, 'pallate/find_collaborators.html', {
+        'matches': potential_matches,
+        'current_profile': current_profile,
+    })
+
+
+@login_required
+def collaboration_feedback(request, collaboration_id):
+    """Submit feedback/rating for a collaboration"""
+    collaboration = get_object_or_404(Collaboration, id=collaboration_id)
+    
+    # Check if user already submitted feedback
+    existing_feedback = CollaborationFeedback.objects.filter(
+        collaboration=collaboration,
+        reviewer=request.user
+    ).first()
+    
+    if request.method == 'POST':
+        if existing_feedback:
+            form = CollaborationFeedbackForm(request.POST, instance=existing_feedback)
+        else:
+            form = CollaborationFeedbackForm(request.POST)
+        
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.collaboration = collaboration
+            feedback.reviewer = request.user
+            feedback.save()
+            
+            # Notify collaboration owner
+            if request.user != collaboration.user:
+                Notification.objects.create(
+                    user=collaboration.user,
+                    text=f"{request.user.username} rated your collaboration '{collaboration.title}' - {feedback.rating}/5"
+                )
+            
+            messages.success(request, 'Thank you for your feedback!')
+            return redirect('pallate:collaboration_detail', pk=collaboration_id)
+    else:
+        if existing_feedback:
+            form = CollaborationFeedbackForm(instance=existing_feedback)
+        else:
+            form = CollaborationFeedbackForm()
+    
+    # Get all feedbacks for this collaboration
+    all_feedbacks = CollaborationFeedback.objects.filter(
+        collaboration=collaboration
+    ).select_related('reviewer').order_by('-created_at')
+    
+    # Calculate average rating
+    if all_feedbacks.exists():
+        avg_rating = sum(f.rating for f in all_feedbacks) / len(all_feedbacks)
+    else:
+        avg_rating = 0
+    
+    return render(request, 'pallate/collaboration_feedback.html', {
+        'collaboration': collaboration,
+        'form': form,
+        'existing_feedback': existing_feedback,
+        'all_feedbacks': all_feedbacks,
+        'avg_rating': round(avg_rating, 1),
+    })
+
+
+@login_required
+def featured_artists(request):
+    """Display featured artists"""
+    featured_profiles = Profile.objects.filter(
+        is_featured=True
+    ).select_related('user').order_by('-user__date_joined')
+    
+    # Get their artworks
+    featured_data = []
+    for profile in featured_profiles:
+        artworks = Artwork.objects.filter(user=profile.user).order_by('-created_at')[:3]
+        featured_data.append({
+            'profile': profile,
+            'user': profile.user,
+            'artworks': artworks,
+            'total_artworks': Artwork.objects.filter(user=profile.user).count(),
+        })
+    
+    return render(request, 'pallate/featured_artists.html', {
+        'featured_data': featured_data,
+    })
+
+
+@login_required
+def collaboration_matches(request, collaboration_id):
+    """View suggested matches for a specific collaboration"""
+    collaboration = get_object_or_404(Collaboration, id=collaboration_id)
+    
+    # Only owner can see matches
+    if collaboration.user != request.user:
+        messages.error(request, "You don't have permission to view these matches.")
+        return redirect('pallate:collaboration_detail', pk=collaboration_id)
+    
+    # Generate matches if not exists
+    existing_matches = CollaborationMatch.objects.filter(collaboration=collaboration)
+    
+    if not existing_matches.exists():
+        # Generate matches based on collaboration owner's profile
+        owner_profile = collaboration.user.profile
+        potential_users = User.objects.exclude(id=request.user.id).select_related('profile')
+        
+        for user in potential_users:
+            if hasattr(user, 'profile'):
+                profile = user.profile
+                match_score = 0
+                
+                # Art type match
+                if owner_profile.art_type and profile.art_type:
+                    if owner_profile.art_type.lower() in profile.art_type.lower() or \
+                       profile.art_type.lower() in owner_profile.art_type.lower():
+                        match_score += 50
+                
+                # Interests overlap
+                owner_interests = set(i.lower() for i in owner_profile.get_interests_list())
+                user_interests = set(i.lower() for i in profile.get_interests_list())
+                common_interests = owner_interests & user_interests
+                
+                if common_interests:
+                    match_score += len(common_interests) * 20
+                
+                # Create match if score > 0
+                if match_score > 0:
+                    CollaborationMatch.objects.create(
+                        collaboration=collaboration,
+                        suggested_user=user,
+                        match_score=match_score
+                    )
+    
+    # Get all matches
+    matches = CollaborationMatch.objects.filter(
+        collaboration=collaboration
+    ).select_related('suggested_user__profile').order_by('-match_score')
+    
+    return render(request, 'pallate/collaboration_matches.html', {
+        'collaboration': collaboration,
+        'matches': matches,
+    })
+
+
+# ============================================
+# PASSWORD RESET (No Email Required)
+# ============================================
+
+def password_reset_no_email(request):
+    """Step 1: Enter username/email to find account"""
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            username_or_email = form.cleaned_data['username_or_email']
+            
+            # Try to find user by username or email
+            try:
+                if '@' in username_or_email:
+                    user = User.objects.get(email=username_or_email)
+                else:
+                    user = User.objects.get(username=username_or_email)
+                
+                # Check if user has security question set
+                if hasattr(user, 'profile') and user.profile.security_question:
+                    # Store user_id in session for next step
+                    request.session['reset_user_id'] = user.id
+                    return redirect('pallate:password_reset_security_question')
+                else:
+                    messages.error(request, 'No security question set for this account. Please contact an administrator.')
+                    return redirect('pallate:login')
+                    
+            except User.DoesNotExist:
+                messages.error(request, 'No account found with that username or email.')
+    else:
+        form = PasswordResetRequestForm()
+    
+    return render(request, 'pallate/password_reset_no_email.html', {'form': form})
+
+
+def password_reset_security_question(request):
+    """Step 2: Answer security question"""
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('pallate:password_reset_no_email')
+    
+    try:
+        user = User.objects.get(id=user_id)
+        profile = user.profile
+    except (User.DoesNotExist, Profile.DoesNotExist):
+        messages.error(request, 'Invalid session. Please try again.')
+        return redirect('pallate:password_reset_no_email')
+    
+    if request.method == 'POST':
+        form = SecurityQuestionAnswerForm(request.POST)
+        if form.is_valid():
+            answer = form.cleaned_data['security_answer'].strip().lower()
+            stored_answer = profile.security_answer.strip().lower()
+            
+            if answer == stored_answer:
+                # Correct answer, proceed to password reset
+                return redirect('pallate:password_reset_new_password')
+            else:
+                messages.error(request, 'Incorrect answer. Please try again.')
+    else:
+        form = SecurityQuestionAnswerForm()
+    
+    return render(request, 'pallate/password_reset_security_question.html', {
+        'form': form,
+        'security_question': profile.security_question,
+        'username': user.username
+    })
+
+
+def password_reset_new_password(request):
+    """Step 3: Set new password"""
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('pallate:password_reset_no_email')
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid session. Please try again.')
+        return redirect('pallate:password_reset_no_email')
+    
+    if request.method == 'POST':
+        form = NewPasswordForm(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password1']
+            user.set_password(new_password)
+            user.save()
+            
+            # Clear session
+            if 'reset_user_id' in request.session:
+                del request.session['reset_user_id']
+            
+            messages.success(request, 'Password reset successful! You can now log in with your new password.')
+            return redirect('pallate:login')
+    else:
+        form = NewPasswordForm()
+    
+    return render(request, 'pallate/password_reset_new_password.html', {
+        'form': form,
+        'username': user.username
     })

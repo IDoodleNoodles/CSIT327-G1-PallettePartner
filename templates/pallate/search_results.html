@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Search Results | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
+
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+  {% include 'pallate/_sidebar.html' %}
+
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto relative">
+
+    <header class="flex items-center justify-between px-10 py-4 bg-[#050819] sticky top-0 z-20">
+      <div class="flex items-center gap-10 w-full">
+        <div class="text-xl font-semibold text-white">
+          <span class="text-white">Palette</span><span class="text-[#8B5CF6]">Partners</span>
+        </div>
+
+        <form method="get" action="{% url 'pallate:search' %}" class="flex items-center w-full max-w-xl bg-card-dark border border-border-dark rounded-md px-4 py-2 shadow">
+          <img src="{% static 'icon/search_icon.png' %}"
+               class="w-4 h-4 opacity-80 mr-2 invert" alt="">
+          <input type="text" 
+                 name="q" 
+                 value="{{ query }}"
+                 placeholder="Search projects, artist"
+                 class="bg-transparent text-sm w-full text-text-light placeholder-muted focus:outline-none">
+        </form>
+      </div>
+
+      <div class="flex items-center gap-4">
+
+        <div class="relative">
+          <button id="notifToggle"
+                  type="button"
+                  class="relative hover:opacity-80 transition flex items-center justify-center">
+            <img src="{% static 'icon/notification_icon.png' %}" class="w-5 h-5" alt="Notifications">
+          </button>
+        </div>
+
+        <button id="menuToggle" class="lg:hidden hover:opacity-80 transition">
+          <img src="{% static 'icon/menu_icon.png' %}" class="w-6 h-6" alt="Menu">
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-1 px-10 py-6">
+      
+      {% if query %}
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-white mb-2">Search Results for "{{ query }}"</h1>
+          <p class="text-muted">Found {{ artworks|length }} artwork(s) and {{ artists|length }} artist(s)</p>
+        </div>
+
+        {% if artists %}
+        <section class="mb-10">
+          <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="">
+            Artists
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for artist in artists %}
+            <a href="{% url 'pallate:artist_profile_by_id' artist.id %}" 
+               class="bg-card-dark border border-border-dark rounded-lg p-6 hover:border-[#8B5CF6] transition">
+              <div class="flex items-center gap-4 mb-3">
+                {% if artist.profile.profile_picture %}
+                  <img src="{{ artist.profile.profile_picture.url }}" 
+                       class="w-12 h-12 rounded-full object-cover border-2 border-[#8B5CF6]" 
+                       alt="{{ artist.username }}">
+                {% else %}
+                  <div class="w-12 h-12 rounded-full bg-[#8B5CF6] flex items-center justify-center text-white font-bold">
+                    {{ artist.username|slice:":1"|upper }}
+                  </div>
+                {% endif %}
+                <div>
+                  <h3 class="font-semibold text-white">{{ artist.username }}</h3>
+                  {% if artist.profile.art_type %}
+                    <p class="text-xs text-muted">{{ artist.profile.art_type }}</p>
+                  {% endif %}
+                </div>
+              </div>
+              {% if artist.profile.bio %}
+                <p class="text-sm text-muted line-clamp-2">{{ artist.profile.bio }}</p>
+              {% endif %}
+            </a>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if artworks %}
+        <section>
+          <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <img src="{% static 'icon/upload_artwork_icon.png' %}" class="w-5 h-5" alt="">
+            Artworks
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for artwork in artworks %}
+            <div class="bg-card-dark border border-border-dark rounded-lg overflow-hidden hover:border-[#8B5CF6] transition artwork-card"
+                 data-artwork-id="{{ artwork.id }}">
+              <div class="relative aspect-square">
+                <img src="{{ artwork.image.url }}" 
+                     alt="{{ artwork.title }}"
+                     class="w-full h-full object-cover cursor-pointer artwork-image"
+                     data-artwork-id="{{ artwork.id }}">
+
+                <button class="favorite-btn absolute top-3 right-3 bg-black bg-opacity-60 hover:bg-opacity-80 rounded-full p-2 transition"
+                        data-artwork-id="{{ artwork.id }}"
+                        data-favorited="{% if artwork.id in user_favorites %}true{% else %}false{% endif %}">
+                  {% if artwork.id in user_favorites %}
+                    <svg class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                  {% else %}
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                  {% endif %}
+                </button>
+              </div>
+
+              <div class="p-4">
+                <h3 class="font-semibold text-white mb-1 truncate">{{ artwork.title }}</h3>
+                <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}" 
+                   class="text-sm text-muted hover:text-[#8B5CF6] transition">
+                  by {{ artwork.user.username }}
+                </a>
+                
+                <div class="flex items-center gap-4 mt-3 text-xs text-muted">
+                  <button class="comment-btn flex items-center gap-1 hover:text-white transition"
+                          data-artwork-id="{{ artwork.id }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <span>{{ artwork.comment_count }}</span>
+                  </button>
+                  <span class="text-xs">{{ artwork.created_at|timesince }} ago</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if not artworks and not artists %}
+        <div class="text-center py-20">
+          <img src="{% static 'icon/search_icon.png' %}" class="w-16 h-16 mx-auto opacity-30 invert mb-4" alt="">
+          <h3 class="text-xl font-semibold text-white mb-2">No results found</h3>
+          <p class="text-muted">Try searching with different keywords</p>
+        </div>
+        {% endif %}
+
+      {% else %}
+
+        <div class="text-center py-20">
+          <img src="{% static 'icon/search_icon.png' %}" class="w-16 h-16 mx-auto opacity-30 invert mb-4" alt="">
+          <h3 class="text-xl font-semibold text-white mb-2">Start searching</h3>
+          <p class="text-muted">Enter a keyword to search for artworks and artists</p>
+        </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+
+<div id="artworkModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+  <div class="relative max-w-5xl max-h-[90vh] w-full">
+    <button id="closeModal" class="absolute -top-10 right-0 text-white hover:text-gray-300 text-2xl">&times;</button>
+    <img id="modalImage" src="" alt="" class="w-full h-auto max-h-[85vh] object-contain rounded-lg">
+  </div>
+</div>
+
+<script src="{% static 'js/favorites.js' %}"></script>
+<script src="{% static 'js/cards.js' %}"></script>
+<script src="{% static 'js/navigation.js' %}"></script>
+{% endblock %}
