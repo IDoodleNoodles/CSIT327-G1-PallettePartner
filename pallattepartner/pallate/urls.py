@@ -27,4 +27,14 @@ urlpatterns = [
     path('notifications/mark-as-read/<int:notification_id>/', views.mark_notification_as_read, name='mark_notification_as_read'),
     path('notifications/', views.notifications_list, name='notifications_list'),
     
+    # New features: Matching, Feedback, Featured Artists
+    path('find-collaborators/', views.find_collaborators, name='find_collaborators'),
+    path('collaboration/<int:collaboration_id>/feedback/', views.collaboration_feedback, name='collaboration_feedback'),
+    path('collaboration/<int:collaboration_id>/matches/', views.collaboration_matches, name='collaboration_matches'),
+    path('featured-artists/', views.featured_artists, name='featured_artists'),
+    
+    # Password Reset (No Email)
+    path('reset-password/', views.password_reset_no_email, name='password_reset_no_email'),
+    path('reset-password/security-question/', views.password_reset_security_question, name='password_reset_security_question'),
+    path('reset-password/new-password/', views.password_reset_new_password, name='password_reset_new_password'),
 ]

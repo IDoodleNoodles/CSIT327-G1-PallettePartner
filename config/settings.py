@@ -42,6 +42,7 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1', 'https://.onrend
 INSTALLED_APPS = [
     'crispy_forms',
     'crispy_tailwind',
+    'storages',  # django-storages for Supabase/S3 storage
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -177,3 +178,48 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ===========================
+# SUPABASE STORAGE CONFIGURATION
+# ===========================
+# For production deployment with Supabase Storage (S3-compatible)
+USE_SUPABASE_STORAGE = os.getenv('USE_SUPABASE_STORAGE', 'False').lower() == 'true'
+
+if USE_SUPABASE_STORAGE:
+    # Supabase project configuration
+    SUPABASE_URL = os.getenv('SUPABASE_URL')  # e.g., https://xxxxx.supabase.co
+    SUPABASE_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_STORAGE_BUCKET_NAME', 'pallettepartner-media')
+    
+    # S3-compatible storage settings for Supabase
+    AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = SUPABASE_STORAGE_BUCKET_NAME
+    AWS_S3_REGION_NAME = os.getenv('SUPABASE_REGION', 'us-east-1')
+    AWS_S3_ENDPOINT_URL = f"{SUPABASE_URL}/storage/v1/s3"
+    AWS_S3_CUSTOM_DOMAIN = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET_NAME}"
+    
+    # Storage behavior
+    AWS_S3_FILE_OVERWRITE = False  # Don't overwrite existing files
+    AWS_DEFAULT_ACL = None  # Use bucket's default ACL
+    AWS_QUERYSTRING_AUTH = False  # Don't add auth params to public URLs
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',  # Cache for 1 day
+    }
+    
+    # Use custom storage backends
+    DEFAULT_FILE_STORAGE = 'pallattepartner.pallate.storage.SupabaseMediaStorage'
+    STATICFILES_STORAGE = 'pallattepartner.pallate.storage.SupabaseStaticStorage'
+    
+    # Update URLs to use Supabase
+    MEDIA_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET_NAME}/media/"
+    STATIC_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET_NAME}/static/"
+    
+    print("✅ Using Supabase Storage for media and static files")
+else:
+    # Development: use local file system
+    print("📁 Using local file system for media and static files")
+
+# Whitenoise for serving static files in production (fallback if not using Supabase for static)
+if not USE_SUPABASE_STORAGE:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

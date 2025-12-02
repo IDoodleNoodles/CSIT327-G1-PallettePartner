@@ -55,6 +55,23 @@
         <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
         <span>My Profile</span>
       </a>
+
+      <!-- New Features -->
+      <div class="pt-3 mt-3 border-t border-[#111827]">
+        <p class="text-xs text-gray-500 mb-2 px-3">DISCOVER</p>
+        
+        <a href="{% url 'pallate:find_collaborators' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+          <span class="text-lg">🤝</span>
+          <span>Find Collaborators</span>
+        </a>
+
+        <a href="{% url 'pallate:featured_artists' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+          <span class="text-lg">⭐</span>
+          <span>Featured Artists</span>
+        </a>
+      </div>
     </nav>
 
     <div class="mt-auto pt-8 border-t border-[#111827]">

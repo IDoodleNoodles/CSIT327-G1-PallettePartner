@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Collaboration, Profile, Artwork, Message, ArtworkComment
+from django.contrib.auth.hashers import make_password, check_password
+from .models import Collaboration, Profile, Artwork, Message, ArtworkComment, CollaborationFeedback
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label="First Name")
@@ -104,9 +105,30 @@ class ProfileForm(forms.ModelForm):
         label='Confirm Password'
     )
     
+    security_question = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g., What was your first pet\'s name?',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='Security Question (for password recovery)',
+        help_text='Set a question only you can answer'
+    )
+    security_answer = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Your answer (case-insensitive)',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='Security Answer',
+        help_text='This will be used to verify your identity if you forget your password'
+    )
+    
     class Meta:
         model = Profile
-        fields = ['avatar', 'art_type', 'portfolio', 'bio']
+        fields = ['avatar', 'art_type', 'portfolio', 'bio', 'interests', 'security_question', 'security_answer']
         
         # Reusable CSS class for input fields
         input_class = 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
@@ -128,13 +150,19 @@ class ProfileForm(forms.ModelForm):
                 'placeholder': 'Tell us about yourself...',
                 'class': input_class,
                 'rows': 4
+            }),
+            'interests': forms.Textarea(attrs={
+                'placeholder': 'e.g., Fantasy Art, Portraits, Digital Painting, Character Design',
+                'class': input_class,
+                'rows': 3
             })
         }
         labels = {
             'avatar': 'Profile Picture',
             'art_type': 'Art Type',
             'portfolio': 'Portfolio URL',
-            'bio': 'Bio'
+            'bio': 'Bio',
+            'interests': 'Interests (comma-separated)'
         }
     
     def __init__(self, *args, **kwargs):
@@ -243,3 +271,82 @@ class MessageForm(forms.ModelForm):
                 "id": "id_image",           
             }),
         }
+
+
+class CollaborationFeedbackForm(forms.ModelForm):
+    """Form for submitting feedback/rating for a collaboration"""
+    class Meta:
+        model = CollaborationFeedback
+        fields = ['rating', 'comment']
+        
+        widgets = {
+            'rating': forms.RadioSelect(attrs={
+                'class': 'rating-radio'
+            }),
+            'comment': forms.Textarea(attrs={
+                'placeholder': 'Share your collaboration experience...',
+                'class': 'w-full px-4 py-3 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple',
+                'rows': 4
+            })
+        }
+        labels = {
+            'rating': 'Rate this collaboration',
+            'comment': 'Your feedback (optional)'
+        }
+
+
+# Password Reset Forms (No Email Required)
+class PasswordResetRequestForm(forms.Form):
+    """Step 1: Enter username/email to initiate password reset"""
+    username_or_email = forms.CharField(
+        max_length=254,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your username or email',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='Username or Email'
+    )
+
+
+class SecurityQuestionAnswerForm(forms.Form):
+    """Step 2: Answer security question"""
+    security_answer = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Your answer',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='Answer'
+    )
+
+
+class NewPasswordForm(forms.Form):
+    """Step 3: Set new password"""
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'New password',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='New Password',
+        help_text='Password must be at least 8 characters'
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Confirm new password',
+            'class': 'w-full px-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-purple'
+        }),
+        label='Confirm New Password'
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('new_password1')
+        password2 = cleaned_data.get('new_password2')
+        
+        if password1 and password2:
+            if password1 != password2:
+                raise forms.ValidationError('Passwords do not match.')
+            if len(password1) < 8:
+                raise forms.ValidationError('Password must be at least 8 characters.')
+        
+        return cleaned_data

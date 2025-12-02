@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Suggested Matches | PallettePartner{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#050819] text-[#E5E7EB]">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="{% url 'pallate:collaboration_detail' collaboration.id %}" 
+         class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-white mb-4">
+        <span class="text-xl">←</span>
+        <span>Back to Collaboration</span>
+      </a>
+      <h1 class="text-3xl font-bold text-white mb-2">Suggested Collaborators</h1>
+      <h2 class="text-xl text-gray-400">For: {{ collaboration.title }}</h2>
+    </div>
+
+    <!-- Matches -->
+    {% if matches %}
+      <div class="space-y-4 mb-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-white">{{ matches|length }} Suggested Match{{ matches|length|pluralize:"es" }}</h3>
+          <span class="text-sm text-gray-400">Sorted by match score</span>
+        </div>
+        
+        {% for match in matches %}
+        <div class="bg-[#1A2035] rounded-lg p-6 border border-[#232B46] hover:border-[#8B5CF6] transition">
+          <div class="flex items-start gap-6">
+            <!-- Avatar -->
+            <div class="flex-shrink-0">
+              <img src="{{ match.suggested_user.profile.avatar.url }}" 
+                   alt="{{ match.suggested_user.username }}"
+                   class="w-20 h-20 rounded-full object-cover border-2 border-[#8B5CF6]">
+            </div>
+            
+            <!-- User Info -->
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h4 class="text-xl font-semibold text-white">
+                    {{ match.suggested_user.get_full_name|default:match.suggested_user.username }}
+                  </h4>
+                  <p class="text-sm text-gray-400">@{{ match.suggested_user.username }}</p>
+                </div>
+                <span class="bg-[#8B5CF6] text-white px-4 py-2 rounded-full text-sm font-bold">
+                  Score: {{ match.match_score }}
+                </span>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-4">
+                {% if match.suggested_user.profile.art_type %}
+                <div>
+                  <span class="text-gray-400">Art Type:</span>
+                  <span class="text-white ml-2">{{ match.suggested_user.profile.art_type }}</span>
+                </div>
+                {% endif %}
+                
+                {% if match.suggested_user.profile.interests %}
+                <div>
+                  <span class="text-gray-400">Interests:</span>
+                  <span class="text-white ml-2">{{ match.suggested_user.profile.interests }}</span>
+                </div>
+                {% endif %}
+              </div>
+              
+              {% if match.suggested_user.profile.bio %}
+              <p class="text-gray-300 text-sm mb-4">{{ match.suggested_user.profile.bio|truncatewords:30 }}</p>
+              {% endif %}
+              
+              <!-- Actions -->
+              <div class="flex gap-3">
+                <a href="{% url 'pallate:artist_profile_by_id' match.suggested_user.id %}" 
+                   class="bg-[#8B5CF6] hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm">
+                  View Profile
+                </a>
+                {% if match.is_viewed %}
+                  <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-lg text-sm">Viewed</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bg-[#1A2035] rounded-lg p-12 text-center border border-[#232B46]">
+        <img src="{% static 'icon/artist_icon.png' %}" class="w-16 h-16 mx-auto mb-4 opacity-50" alt="">
+        <h3 class="text-xl font-semibold text-white mb-2">No Matches Found</h3>
+        <p class="text-gray-400 mb-6">
+          We couldn't find any artists matching your profile criteria for this collaboration.
+        </p>
+        <div class="flex gap-3 justify-center">
+          <a href="{% url 'pallate:edit_profile' %}" 
+             class="bg-[#8B5CF6] hover:bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold transition">
+            Update Profile
+          </a>
+          <a href="{% url 'pallate:find_collaborators' %}" 
+             class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition">
+            Browse All Artists
+          </a>
+        </div>
+      </div>
+    {% endif %}
+    
+  </div>
+</div>
+{% endblock %}

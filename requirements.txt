@@ -7,3 +7,11 @@ python-dotenv==1.1.1
 dj-database-url==3.0.1
 pillow==10.4.0
 gunicorn==23.0.0
+whitenoise==6.8.2
+
+# Storage backends
+django-storages==1.14.4
+boto3==1.35.76  # For S3-compatible storage (Supabase uses S3 protocol)
+
+# Supabase client (optional, for advanced features)
+supabase==2.10.0
