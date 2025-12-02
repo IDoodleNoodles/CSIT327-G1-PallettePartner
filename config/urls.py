@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include(('pallattepartner.pallate.urls', 'pallate'), namespace='pallate')),
 ]
 
-# Allow media files (profile pictures, etc.) in development
-if settings.DEBUG:
+# Allow media files (profile pictures, etc.) in development - only when not using Supabase
+if settings.DEBUG and not getattr(settings, 'USE_SUPABASE_STORAGE', False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
