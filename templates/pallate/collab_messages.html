@@ -13,27 +13,29 @@
     </h1>
 
     <nav class="flex flex-col gap-3 text-sm font-medium text-[#CBD5F5]">
+
       <a href="{% url 'pallate:dashboard' %}"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+         class="flex items-center gap-3 px-3 py-2 rounded-lg
+                {% if request.path == '/dashboard/' %}bg-[#12172D] text-white{% else %}hover:bg-[#12172D] hover:text-white{% endif %}">
         <img src="{% static 'icon/home_icon.png' %}" class="w-5 h-5" alt="Home">
         <span>Dashboard</span>
       </a>
 
       <a href="{% url 'pallate:artist_profile_by_id' request.user.id %}"
          class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
-        <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artist">
+        <img src="{% static 'icon/artist_icon.png' %}" class="w-5 h-5" alt="Artists">
         <span>Artist</span>
       </a>
 
       <a href="{% url 'pallate:collaboration_detail_legacy' %}"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#12172D] text-white">
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
         <img src="{% static 'icon/collabpost_icon.png' %}" class="w-5 h-5" alt="Collaboration">
         <span>Collaboration</span>
       </a>
 
       <a href="{% url 'pallate:upload_artwork' %}"
          class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
-        <img src="{% static 'icon/Upload_artwork_icon.png' %}" class="w-5 h-5" alt="Upload">
+        <img src="{% static 'icon/upload_artwork_icon.png' %}" class="w-5 h-5" alt="Upload">
         <span>Upload Artworks</span>
       </a>
 
@@ -48,6 +50,23 @@
         <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
         <span>My Profile</span>
       </a>
+
+      <!-- New Features -->
+      <div class="pt-3 mt-3 border-t border-[#111827]">
+        <p class="text-xs text-gray-500 mb-2 px-3">DISCOVER</p>
+        
+        <a href="{% url 'pallate:find_collaborators' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+          <span class="text-lg">🤝</span>
+          <span>Find Collaborators</span>
+        </a>
+
+        <a href="{% url 'pallate:featured_artists' %}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#12172D] hover:text-white">
+          <span class="text-lg">⭐</span>
+          <span>Featured Artists</span>
+        </a>
+      </div>
     </nav>
 
     <div class="mt-auto pt-8 border-t border-[#111827]">
@@ -66,9 +85,6 @@
         
         <div>
           <p class="text-sm text-[#9CA3AF]">Collaboration Chat</p>
-          <h1 class="text-xl font-semibold text-[#A7F3D0]">
-            {{ collaboration.title }}
-          </h1>
         </div>
       </div>
 

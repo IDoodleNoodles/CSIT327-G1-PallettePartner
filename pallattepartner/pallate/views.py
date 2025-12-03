@@ -276,9 +276,11 @@ def fetch_artworks_by_category(request):
                 'description': artwork.description,
                 'image_url': artwork.image.url if artwork.image else '',
                 'user_username': artwork.user.username,
+                'user_first_name': artwork.user.first_name,
                 'user_id': artwork.user.id,
                 'created_at': artwork.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 'comment_count': artwork.comment_count,
+                'favorite_count': artwork.favorited_by.count(),
                 'categories': artwork.get_categories_list(),
             })
         
@@ -362,33 +364,31 @@ def profile_view(request):
     })
 
 
-# Edit Profile (Form-based)
 @login_required
 def edit_profile(request):
     profile = request.user.profile
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            # Save profile but don't commit yet
-            profile_instance = form.save(commit=False)
-            
+            # Save Profile + User (username, email, names, password)
+            profile_instance = form.save(commit=True)
+
             # Hash security answer if provided
             security_answer = form.cleaned_data.get('security_answer')
             if security_answer:
-                from django.contrib.auth.hashers import make_password
                 profile_instance.security_answer = make_password(security_answer)
-            
-            profile_instance.save()
-            
-            # If password was changed, update the session to keep user logged in
+                profile_instance.save(update_fields=['security_answer'])
+
+            # Keep user logged in if password changed
             password = form.cleaned_data.get('password')
             if password:
-                from django.contrib.auth import update_session_auth_hash
                 update_session_auth_hash(request, request.user)
-            
+
             return redirect('pallate:profile')
     else:
         form = ProfileForm(instance=profile)
+
     return render(request, 'pallate/edit_profile.html', {'form': form})
 
 

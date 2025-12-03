@@ -4,7 +4,31 @@
 {% block title %}{% if show_single %}{{ artist_user.username }}{% else %}Discover Artists{% endif %} | PallettePartner{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
+<div class="min-h-screen flex bg-[#050819] text-[#E5E7EB] relative overflow-hidden">
+  <!-- Artistic paint splash background elements -->
+  <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+    <!-- Large purple splash -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 opacity-10 blur-3xl">
+      <div class="w-full h-full rounded-full bg-[#8B5CF6] animate-pulse"></div>
+    </div>
+    
+    <!-- Medium blue splash -->
+    <div class="absolute bottom-[-5%] right-[-5%] w-80 h-80 opacity-10 blur-3xl">
+      <div class="w-full h-full rounded-full bg-[#6366F1] animate-pulse" style="animation-delay: 1s;"></div>
+    </div>
+    
+    <!-- Small teal splash -->
+    <div class="absolute top-[30%] right-[20%] w-40 h-40 opacity-15 blur-2xl">
+      <div class="w-full h-full rounded-full bg-[#A7F3D0] animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <!-- Abstract brush stroke -->
+    <div class="absolute top-[20%] right-[10%] w-64 h-32 opacity-5">
+      <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10,50 Q50,10 100,30 T190,40 Q180,70 150,80 T50,70 Q20,60 10,50" fill="#8B5CF6"/>
+      </svg>
+    </div>
+  </div>
   {% include "pallate/_sidebar.html" %}
   
   <!-- MAIN CONTENT -->
@@ -92,9 +116,17 @@
     </section>
     {% else %}
     <!-- SINGLE ARTIST VIEW (when user_id is provided) -->
-    <section class="px-10 py-6">
-      <a href="{% url 'pallate:artist_profile' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] mb-4 transform hover:scale-105 transition duration-300">
-        ← Back to Community
+    <section class="px-10 py-6 relative">
+      <!-- Artistic splash behind back button -->
+      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-64 h-64 opacity-5 -z-10">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20,100 Q50,20 100,50 T180,80 Q160,120 120,150 T60,140 Q40,120 20,100" fill="#8B5CF6"/>
+        </svg>
+      </div>
+      
+      <a href="{% url 'pallate:artist_profile' %}" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#8B5CF6]/50 relative overflow-hidden group z-10">
+        <span class="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
+        ← Community
       </a>
       
       <!-- Decorative paint stroke element -->
@@ -105,6 +137,18 @@
       </div>
       
       <div class="bg-[#0B1221] rounded-3xl border border-[#1F2937] shadow-2xl p-8 relative overflow-hidden">
+        <!-- Artistic paint splash inside card -->
+        <div class="absolute top-0 right-0 w-64 h-64 opacity-5 -z-10">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20,100 Q50,20 100,50 T180,80 Q160,120 120,150 T60,140 Q40,120 20,100" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 w-48 h-48 opacity-5 -z-10">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="80" fill="#A7F3D0"/>
+          </svg>
+        </div>
         <!-- Decorative corner elements -->
         <div class="absolute top-0 right-0 w-32 h-32 opacity-10 rotate-12 animate-pulse">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
