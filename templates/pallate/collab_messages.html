@@ -7,7 +7,7 @@
 <div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
 
   <!-- LEFT MENU -->
-  <aside class="bg-[#050819] w-64 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl">
+  <aside id="sidebar" class="bg-[#050819] w-64 flex-shrink-0 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl h-screen fixed top-0 left-0 z-40">
     <h1 class="text-base font-semibold text-white flex items-center gap-2 mb-8">
       <span>Menu</span>
     </h1>
@@ -59,7 +59,7 @@
   </aside>
 
   <!-- RIGHT SIDE -->
-  <main class="flex-1 flex flex-col bg-[#050819] overflow-hidden">
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-hidden ml-64">
     <!-- TOP BAR -->
     <header class="flex items-center justify-between px-10 py-4">
       <div class="flex items-center gap-3">
@@ -110,58 +110,95 @@
         </div>
 
         <!-- Messages list -->
-        <div class="flex-1 mt-4 px-4 pb-4 overflow-y-auto space-y-4">
+        <div class="flex-1 mt-4 px-4 pb-4 overflow-y-auto space-y-4 custom-scroll">
           {% if messages %}
             {% for msg in messages %}
-              <div class="bg-[#0B1024] rounded-3xl px-5 py-4 flex flex-col gap-2 shadow">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-[#111827] flex items-center justify-center text-sm font-semibold">
+              {% if msg.sender == request.user %}
+                {# ================== CURRENT USER MESSAGE (RIGHT) ================== #}
+                <div class="flex justify-end">
+                  <div class="max-w-xl flex flex-col items-end gap-1">
+                    <div class="flex items-center gap-2 text-[11px] text-[#9CA3AF]">
+                      <span class="font-medium text-[#C4B5FD]">You</span>
+                      <span>• {{ msg.timestamp|timesince }} ago</span>
+                    </div>
+
+                    <div class="bg-[#8B5CF6] text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-lg">
+                      {% if msg.text %}
+                        <p class="text-sm leading-relaxed">
+                          {{ msg.text }}
+                        </p>
+                      {% endif %}
+
+                      {% if msg.image %}
+                        <div class="mt-2 overflow-hidden rounded-xl border border-white/20 bg-black/30 max-w-md">
+                          <img src="{{ msg.image.url }}" alt="Attachment"
+                               class="w-full h-auto object-cover">
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2 text-[11px] text-[#9CA3AF]">
+                      <button type="button"
+                              class="px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                              data-message-id="{{ msg.id }}" data-emoji="👍">
+                        👍 Like
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              {% else %}
+                {# ================== OTHER USER MESSAGE (LEFT) ================== #}
+                <div class="flex justify-start">
+                  <div class="flex max-w-xl gap-3">
+                    <div class="w-9 h-9 rounded-full bg-[#111827] flex items-center justify-center text-xs font-semibold">
                       {{ msg.sender.username|first|upper }}
                     </div>
-                    <div>
-                      <p class="text-sm font-semibold">
-                        {{ msg.sender.username }}
-                      </p>
-                      <p class="text-[11px] text-[#9CA3AF]">
-                        {{ msg.timestamp|timesince }} ago
-                      </p>
+
+                    <div class="flex flex-col gap-1">
+                      <div class="flex items-center gap-2 text-[11px] text-[#9CA3AF]">
+                        <span class="font-medium text-[#E5E7EB]">
+                          {{ msg.sender.username }}
+                        </span>
+                        <span>• {{ msg.timestamp|timesince }} ago</span>
+                      </div>
+
+                      <div class="bg-[#0B1024] rounded-2xl rounded-bl-sm px-4 py-3 shadow">
+                        {% if msg.text %}
+                          <p class="text-sm text-[#E5E7EB] leading-relaxed">
+                            {{ msg.text }}
+                          </p>
+                        {% endif %}
+
+                        {% if msg.image %}
+                          <div class="mt-2 rounded-xl overflow-hidden border border-[#1F2937] bg-black/40 max-w-md">
+                            <img src="{{ msg.image.url }}" alt="Attachment"
+                                 class="w-full h-auto object-cover">
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="flex items-center gap-2 text-[11px] text-[#9CA3AF] mt-1">
+                        <button type="button"
+                                class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                                data-message-id="{{ msg.id }}" data-emoji="❤️">
+                          <span>❤️</span><span>React</span>
+                        </button>
+                        <button type="button"
+                                class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                                data-message-id="{{ msg.id }}" data-emoji="😂">
+                          <span>😂</span><span>Haha</span>
+                        </button>
+                        <button type="button"
+                                class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
+                                data-message-id="{{ msg.id }}" data-emoji="👍">
+                          <span>👍</span><span>Like</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {% if msg.text %}
-                  <p class="text-sm text-[#E5E7EB]">
-                    {{ msg.text }}
-                  </p>
-                {% endif %}
-
-                {% if msg.image %}
-                  <div class="mt-2 rounded-2xl overflow-hidden border border-[#1F2937] bg-black/40 max-w-md">
-                    <img src="{{ msg.image.url }}" alt="Attachment"
-                         class="w-full h-auto object-cover">
-                  </div>
-                {% endif %}
-
-                <!-- Emoji reactions (UI only for now) -->
-                <div class="mt-3 flex items-center gap-3 text-xs text-[#9CA3AF]">
-                  <button type="button"
-                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                          data-message-id="{{ msg.id }}" data-emoji="❤️">
-                    <span>❤️</span><span>React</span>
-                  </button>
-                  <button type="button"
-                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                          data-message-id="{{ msg.id }}" data-emoji="😂">
-                    <span>😂</span><span>Haha</span>
-                  </button>
-                  <button type="button"
-                          class="flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                          data-message-id="{{ msg.id }}" data-emoji="👍">
-                    <span>👍</span><span>Like</span>
-                  </button>
-                </div>
-              </div>
+              {% endif %}
             {% endfor %}
           {% else %}
             <div class="h-full flex flex-col items-center justify-center text-center text-sm text-[#9CA3AF] gap-2">
@@ -177,21 +214,25 @@
         <!-- INPUT BAR -->
         <form method="post"
               enctype="multipart/form-data"
-              class="border-t border-[#1F2937] px-6 py-4 flex items-center gap-3 bg-[#050819]">
+              class="border-t border-[#1F2937] px-6 py-4 bg-[#050819]/95 backdrop-blur flex items-center gap-3">
           {% csrf_token %}
+
           <div class="flex-1">
-            {{ form.text }}
+            <div class="relative">
+              {{ form.text }}
+              {# if your widget has no classes, you can style via Tailwind in CSS or add manually in forms.py #}
+            </div>
           </div>
 
           <!-- attach image -->
           <label for="id_image"
-                 class="w-10 h-10 flex items-center justify-center rounded-full bg-[#111827] hover:bg-[#1F2937] cursor-pointer">
+                 class="w-10 h-10 flex items-center justify-center rounded-full bg-[#111827] hover:bg-[#1F2937] cursor-pointer transition">
             <img src="{% static 'icon/upload_icon.png' %}" class="w-4 h-4" alt="Attach">
           </label>
           {{ form.image }}
 
           <button type="submit"
-                  class="px-6 py-2 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-semibold text-white">
+                  class="px-7 py-2.5 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-semibold text-white shadow-lg shadow-[#8B5CF6]/30 transition">
             Send
           </button>
         </form>

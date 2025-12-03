@@ -11,30 +11,63 @@
       <div class="grid grid-cols-3 items-center">
         <div class="flex">
           <a href="{% url 'pallate:dashboard' %}"
-             class="inline-flex w-max items-center gap-2 bg-[#232B46] hover:bg-[#374151] text-[#E5E7EB] px-3 py-2 rounded-lg font-semibold transition text-sm">
+             class="inline-flex w-max items-center gap-2 bg-[#232B46] hover:bg-[#374151] text-[#E5E7EB] px-3 py-2 rounded-lg font-semibold transition text-sm transform hover:scale-105 duration-300">
             <span class="text-lg">←</span>
             <span>Back to Dashboard</span>
           </a>
         </div>
         <div class="flex justify-center">
-          <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] bg-clip-text text-transparent">My Profile</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] bg-clip-text text-transparent flex items-center gap-2">
+            <span>👤</span>
+            My Profile
+            <span>🎨</span>
+          </h1>
         </div>
         <div></div>
       </div>
     </div>
 
-    <div class="bg-[#1A2035] rounded-2xl shadow-2xl overflow-hidden border border-[#232B46]">
+    <!-- Decorative header elements -->
+    <div class="relative max-w-6xl mx-auto">
+      <!-- Decorative paint stroke -->
+      <div class="absolute -top-8 -left-8 w-32 h-32 opacity-10 -z-10 animate-pulse">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10,30 Q50,5 90,30 T90,90 Q50,65 10,90 T10,30" fill="#8B5CF6"/>
+        </svg>
+      </div>
+      
+      <div class="absolute -bottom-8 -right-8 w-24 h-24 opacity-10 -z-10 animate-bounce">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="40" fill="#A7F3D0"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bg-[#1A2035] rounded-2xl shadow-2xl overflow-hidden border border-[#232B46] relative">
+      <!-- Decorative elements -->
+      <div class="absolute top-0 right-0 w-32 h-32 opacity-5 -z-10 animate-pulse">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,5 90,95 10,95" fill="#8B5CF6"/>
+        </svg>
+      </div>
       
       <!-- Profile Layout -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
         
         <!-- LEFT: Avatar Section -->
-        <section class="bg-[#0D1426] flex flex-col items-center p-8 border-b md:border-b-0 md:border-r border-[#232B46]">
-          <div class="w-32 h-32 rounded-full bg-[#232B46] flex items-center justify-center border-4 border-[#A7F3D0]/20 overflow-hidden">
+        <section class="bg-[#0D1426] flex flex-col items-center p-8 border-b md:border-b-0 md:border-r border-[#232B46] relative">
+          <!-- Decorative circle -->
+          <div class="absolute top-4 right-4 w-16 h-16 opacity-10 animate-spin">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="45" fill="#A7F3D0"/>
+            </svg>
+          </div>
+          
+          <div class="w-32 h-32 rounded-full bg-[#232B46] flex items-center justify-center border-4 border-[#A7F3D0]/20 overflow-hidden shadow-lg hover:shadow-[#A7F3D0]/50 animate-pulse">
             {% if user.profile.avatar %}
               <img src="{{ user.profile.avatar.url }}" class="object-cover w-full h-full" alt="Avatar">
             {% else %}
-              <span class="text-[#9CA3AF] font-semibold text-lg">No Image</span>
+              <span class="text-[#9CA3AF] font-semibold text-lg animate-pulse">No Image</span>
             {% endif %}
           </div>
           <p class="text-[#9CA3AF] text-sm mt-4 text-center">
@@ -46,27 +79,37 @@
         <section class="md:col-span-2 p-6 md:p-8">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Username</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>👤</span> Username
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.username }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Email</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>📧</span> Email
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.email }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Full Name</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>👥</span> Full Name
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.get_full_name|default:"Not set" }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Art Type</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>🎨</span> Art Type
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.art_type|default:"Not set" }}</p>
             </div>
 
             <div class="md:col-span-2">
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Portfolio Link</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>🔗</span> Portfolio Link
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">
                 {% if user.profile.portfolio %}
                   <a href="{{ user.profile.portfolio }}" target="_blank" class="text-[#A7F3D0] hover:text-[#7BE5B4] hover:underline">{{ user.profile.portfolio }}</a>
@@ -77,34 +120,44 @@
             </div>
 
             <div class="md:col-span-2">
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Bio / About Me</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>📝</span> Bio / About Me
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB] whitespace-pre-wrap min-h-[80px]">{{ user.profile.bio|default:"Not set" }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Location</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>📍</span> Location
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.location|default:"Not set" }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Hourly Rate</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>💰</span> Hourly Rate
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.hourly_rate|default:"Not set" }}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Years Active</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>📅</span> Years Active
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.years_active|default:"Not set" }} {% if user.profile.years_active %}year{{ user.profile.years_active|pluralize }}{% endif %}</p>
             </div>
 
             <div>
-              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm">Availability</div>
+              <div class="block text-[#A7F3D0] font-semibold mb-2 text-sm flex items-center gap-1">
+                <span>🕒</span> Availability
+              </div>
               <p class="w-full p-3 rounded-lg border border-[#232B46] bg-[#0D1426] text-[#E5E7EB]">{{ user.profile.availability_status|default:"Not set" }}</p>
             </div>
 
             <div class="md:col-span-2 flex justify-end mt-4">
               <a href="{% url 'pallate:edit_profile' %}"
-                 class="inline-flex items-center justify-center bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base">
-                Edit Profile
+                 class="inline-flex items-center justify-center bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] hover:from-[#7BE5B4] hover:to-[#5DD19D] text-[#0A0A1F] px-4 sm:px-6 py-2 rounded-lg font-semibold transition transform hover:scale-105 duration-300 shadow-lg hover:shadow-[#A7F3D0]/50 animate-bounce">
+                <span class="mr-2">✏️</span> Edit Profile
               </a>
             </div>
           </div>
@@ -116,14 +169,23 @@
     <div class="w-full mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
       
       <!-- User's Artworks -->
-      <div class="bg-[#1A2035] p-6 rounded-2xl shadow-md border border-[#232B46]">
-        <h2 class="text-xl font-bold text-[#A7F3D0] mb-4">🎨 Your Artworks</h2>
+      <div class="bg-[#1A2035] p-6 rounded-2xl shadow-md border border-[#232B46] relative overflow-hidden">
+        <!-- Decorative corner element -->
+        <div class="absolute top-0 right-0 w-20 h-20 opacity-5 -z-10">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        
+        <h2 class="text-xl font-bold text-[#A7F3D0] mb-4 flex items-center gap-2">
+          <span>🖼️</span> Your Artworks
+        </h2>
         {% if user_artworks %}
           <div class="space-y-4 max-h-96 overflow-y-auto">
             {% for artwork in user_artworks %}
-            <div class="bg-[#0D1426] border border-[#232B46] rounded-lg p-3 hover:border-[#A7F3D0] transition">
+            <div class="bg-[#0D1426] border border-[#232B46] rounded-lg p-3 hover:border-[#A7F3D0] transition transform hover:-translate-y-0.5 duration-300 shadow-md hover:shadow-[#A7F3D0]/30">
               {% if artwork.image %}
-              <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-32 object-cover rounded-lg mb-2">
+              <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-32 object-cover rounded-lg mb-2 hover:scale-105 transition duration-300">
               {% endif %}
               <h4 class="text-[#A7F3D0] font-semibold text-sm">{{ artwork.title }}</h4>
               <p class="text-[#9CA3AF] text-xs mt-1 line-clamp-2">{{ artwork.description }}</p>
@@ -134,25 +196,34 @@
         {% else %}
           <div class="flex flex-col items-center justify-center h-40 text-[#9CA3AF]">
             <p>No artworks yet</p>
-            <a href="{% url 'pallate:upload_artwork' %}" class="mt-3 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 py-2 rounded-lg font-semibold transition text-sm">
-              Upload Artwork
+            <a href="{% url 'pallate:upload_artwork' %}" class="mt-3 bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] hover:from-[#7BE5B4] hover:to-[#5DD19D] text-[#0A0A1F] px-4 py-2 rounded-lg font-semibold transition text-sm transform hover:scale-105 duration-300 flex items-center justify-center gap-2">
+              <span>📤</span> Upload Artwork
             </a>
           </div>
         {% endif %}
       </div>
 
       <!-- User's Collaborations -->
-      <div class="bg-[#1A2035] p-6 rounded-2xl shadow-md border border-[#232B46]">
-        <h2 class="text-xl font-bold text-[#A7F3D0] mb-4">🤝 Your Collaborations</h2>
+      <div class="bg-[#1A2035] p-6 rounded-2xl shadow-md border border-[#232B46] relative overflow-hidden">
+        <!-- Decorative corner element -->
+        <div class="absolute top-0 right-0 w-20 h-20 opacity-5 -z-10">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 90,95 10,95" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        
+        <h2 class="text-xl font-bold text-[#A7F3D0] mb-4 flex items-center gap-2">
+          <span>🤝</span> Your Collaborations
+        </h2>
         {% if user_collaborations %}
           <div class="space-y-4 max-h-96 overflow-y-auto">
             {% for collab in user_collaborations %}
-            <div class="bg-[#0D1426] border border-[#232B46] rounded-lg p-3 hover:border-[#A7F3D0] transition">
+            <div class="bg-[#0D1426] border border-[#232B46] rounded-lg p-3 hover:border-[#A7F3D0] transition transform hover:-translate-y-0.5 duration-300 shadow-md hover:shadow-[#A7F3D0]/30">
               <h4 class="text-[#A7F3D0] font-semibold text-sm">{{ collab.title }}</h4>
               <p class="text-[#9CA3AF] text-xs mt-1 line-clamp-2">{{ collab.description }}</p>
               <p class="text-[#6B7280] text-xs mt-2">🕒 {{ collab.created_at|timesince }} ago</p>
-              <a href="{% url 'pallate:collab_messages' collab.id %}" class="inline-block mt-2 text-[#A7F3D0] hover:text-[#7BE5B4] text-xs">
-                View Messages →
+              <a href="{% url 'pallate:collab_messages' collab.id %}" class="inline-block mt-2 text-[#A7F3D0] hover:text-[#7BE5B4] text-xs transform hover:scale-105 transition duration-300 flex items-center gap-1">
+                <span>💬</span> View Messages →
               </a>
             </div>
             {% endfor %}
@@ -160,8 +231,8 @@
         {% else %}
           <div class="flex flex-col items-center justify-center h-40 text-[#9CA3AF]">
             <p>No collaboration posts yet</p>
-            <a href="{% url 'pallate:dashboard' %}" class="mt-3 bg-[#A7F3D0] hover:bg-[#7BE5B4] text-[#0A0A1F] px-4 py-2 rounded-lg font-semibold transition text-sm">
-              Create Post
+            <a href="{% url 'pallate:dashboard' %}" class="mt-3 bg-gradient-to-r from-[#A7F3D0] to-[#7BE5B4] hover:from-[#7BE5B4] hover:to-[#5DD19D] text-[#0A0A1F] px-4 py-2 rounded-lg font-semibold transition text-sm transform hover:scale-105 duration-300 flex items-center justify-center gap-2">
+              <span>➕</span> Create Post
             </a>
           </div>
         {% endif %}
