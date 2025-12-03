@@ -215,7 +215,7 @@
       </div>
     </header>
 
-    <!-- HERO BANNER -->
+    <!-- HERO BANNER -->  
     <section class="relative px-10 pt-2 mb-2">
       <div class="relative w-full h-32 md:h-40 rounded-t-3xl overflow-hidden">
         <img src="{% static 'icon/dashboard_banner.jpg' %}" onerror="this.style.display='none'"
@@ -223,7 +223,7 @@
 
         <div class="absolute inset-0 bg-gradient-to-r from-[#050819]/90 via-[#050819]/40 to-transparent flex flex-col justify-center px-10">
           <h1 class="text-3xl md:text-4xl font-bold text-text-light tracking-tight drop-shadow-sm">
-            Hello, {{request.user.username }}!
+            Hello, {{ request.user.get_full_name|default:request.user.username }}!
           </h1>
           <p class="text-sm md:text-base text-muted mt-1 drop-shadow-sm">
             Explore new artworks and collaboration opportunities.
@@ -245,18 +245,21 @@
             
             <!-- Category Filter Dropdown -->
             <div class="relative">
-              <button id="categoryFilterButton" class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-[#1A2035] text-[#E5E7EB] border border-[#232B46] hover:bg-[#232B46] transition transform hover:scale-105 duration-300">
+              <button id="categoryFilterButton"
+                      class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-[#1A2035] text-[#E5E7EB] border border-[#232B46] hover:bg-[#232B46] transition transform hover:scale-105 duration-300">
                 <span>🎨 Filter by Category</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
               
-              <div id="categoryFilterDropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#1A2035] border border-[#232B46] rounded-lg shadow-2xl z-50">
+              <div id="categoryFilterDropdown"
+                   class="hidden absolute right-0 mt-2 w-64 bg-[#1A2035] border border-[#232B46] rounded-lg shadow-2xl z-50">
                 <div class="p-2">
                   {% for category in all_categories %}
                   <label class="flex items-center p-2 hover:bg-[#232B46] cursor-pointer rounded transition duration-200 hover:scale-105">
-                    <input type="checkbox" name="category_filter" value="{{ category }}" class="mr-2 text-[#8B5CF6] focus:ring-[#8B5CF6] rounded" 
+                    <input type="checkbox" name="category_filter" value="{{ category }}"
+                           class="mr-2 text-[#8B5CF6] focus:ring-[#8B5CF6] rounded"
                            {% if category in selected_categories %}checked{% endif %}>
                     <span class="text-sm flex items-center gap-2">
                       <span class="w-4 h-4 inline-block rounded-sm border border-[#8B5CF6] flex items-center justify-center {% if category in selected_categories %}bg-[#8B5CF6]{% endif %}">
@@ -273,10 +276,12 @@
                 </div>
                 
                 <div class="flex justify-between p-2 border-t border-[#232B46]">
-                  <button id="clearCategoryFilter" class="px-3 py-1 text-xs text-[#8B5CF6] border border-[#8B5CF6] rounded hover:bg-[#8B5CF6]/10 transition duration-300 hover:scale-105">
+                  <button id="clearCategoryFilter"
+                          class="px-3 py-1 text-xs text-[#8B5CF6] border border-[#8B5CF6] rounded hover:bg-[#8B5CF6]/10 transition duration-300 hover:scale-105">
                     ❌ Clear
                   </button>
-                  <button id="applyCategoryFilter" class="px-3 py-1 text-xs text-white bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] rounded hover:from-[#7C3AED] hover:to-[#4F46E5] transition duration-300 hover:scale-105">
+                  <button id="applyCategoryFilter"
+                          class="px-3 py-1 text-xs text-white bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] rounded hover:from-[#7C3AED] hover:to-[#4F46E5] transition duration-300 hover:scale-105">
                     ✅ Apply
                   </button>
                 </div>
@@ -286,96 +291,97 @@
 
           {% if artworks %}
             <div id="recentUploadsScroller"
-                 class="flex flex-col gap-4 max-h-[480px] overflow-y-auto pr-2 snap-y snap-mandatory">
-            scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-transparent hover:scrollbar-thumb-[#4B5563]">
+                 class="flex flex-col gap-3 max-h-[460px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-transparent hover:scrollbar-thumb-[#4B5563] snap-y snap-mandatory">
 
+              <!-- Loading indicator -->
               <div id="loadingIndicator" class="hidden text-center py-4">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#8B5CF6]"></div>
               </div>
 
               {% for artwork in artworks %}
-                <div class="snap-start min-w-[360px] md:min-w-[420px] bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-xl
-                            relative flex flex-col md:flex-row transform hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-300">
+              <div class="snap-start bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-md
+                          relative flex flex-row h-40 transform hover:scale-[1.01] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] transition-all duration-300">
 
-                  <!-- IMAGE SIDE -->
-                  <div class="md:w-1/2 relative bg-[#020617] flex items-center justify-center overflow-hidden">
-                    {% if artwork.image %}
-                      <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
-                           class="w-full h-full object-cover md:max-h-72 transition-transform duration-500 hover:scale-110">
-                    {% else %}
-                      <span class="text-sm text-gray-300">Image coming soon</span>
-                    {% endif %}
+                <!-- IMAGE SIDE (smaller) -->
+                <div class="w-44 h-full relative bg-[#020617] flex-shrink-0 overflow-hidden">
+                  {% if artwork.image %}
+                    <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
+                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                  {% else %}
+                    <span class="text-xs text-gray-300 flex items-center justify-center h-full">Image coming soon</span>
+                  {% endif %}
 
-                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
-
-                    {% if artwork.get_categories_list %}
-                      <div class="absolute left-3 top-3 flex flex-wrap gap-1">
-                        <span class="px-2 py-1 text-[11px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
-                          {{ artwork.get_categories_list.0 }}
+                  {% if artwork.get_categories_list %}
+                    <div class="absolute left-2 top-2 flex flex-wrap gap-1">
+                      <span class="px-2 py-1 text-[10px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
+                        {{ artwork.get_categories_list.0 }}
+                      </span>
+                      {% if artwork.get_categories_list|length > 1 %}
+                        <span class="px-2 py-1 text-[10px] rounded-full bg-black/40 text-gray-200 border border-white/10">
+                          +{{ artwork.get_categories_list|length|add:"-1" }} more
                         </span>
-                        {% if artwork.get_categories_list|length > 1 %}
-                          <span class="px-2 py-1 text-[11px] rounded-full bg-black/40 text-gray-200 border border-white/10">
-                            +{{ artwork.get_categories_list|length|add:"-1" }} more
-                          </span>
-                        {% endif %}
-                      </div>
-                    {% endif %}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- TEXT / META SIDE -->
+                <div class="flex-1 flex flex-col justify-between px-4 py-3 gap-2">
+                  <div>
+                    <p class="text-[11px] uppercase tracking-wide text-muted mb-1">Project Title</p>
+                    <h3 class="text-sm md:text-base font-semibold text-white leading-tight">
+                      {{ artwork.title }}
+                    </h3>
+                    <p class="text-[11px] text-gray-400 mt-1 line-clamp-2">
+                      {{ artwork.description }}
+                    </p>
                   </div>
 
-                  <!-- TEXT / META SIDE -->
-                  <div class="md:w-1/2 flex flex-col justify-between px-5 py-4 gap-3">
-                    <div>
-                      <p class="text-[11px] uppercase tracking-wide text-muted mb-1">Project Title</p>
-                      <h3 class="text-lg font-semibold text-white leading-tight">
-                        {{ artwork.title }}
-                      </h3>
-                      <p class="text-xs text-gray-400 mt-1 line-clamp-2">
-                        {{ artwork.description }}
-                      </p>
-                    </div>
+                  <div class="flex items-center justify-between mt-1 text-[11px] text-muted">
+                    <span>{{ artwork.created_at|timesince }} ago</span>
+                    <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
+                       class="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] text-[11px] text-gray-200 transition">
+                      <span class="w-5 h-5 rounded-full bg-[#1F2937] flex items-center justify-center text-[10px]">
+                        {{ artwork.user.get_full_name|default:artwork.user.username|first|upper }}
+                      </span>
+                      <span class="truncate max-w-[120px]">{{ artwork.user.get_full_name|default:artwork.user.username }}</span>
+                    </a>
+                  </div>
 
-                    <div class="flex items-center justify-between mt-1 text-[11px] text-muted">
-                      <span>{{ artwork.created_at|timesince }} ago</span>
-                      <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
-                         class="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] text-[11px] text-gray-200 transition">
-                        <span class="w-5 h-5 rounded-full bg-[#1F2937] flex items-center justify-center text-[10px]">
-                          {{ artwork.user.username|first|upper }}
-                        </span>
-                        <span>{{ artwork.user.username }}</span>
+                  <div class="mt-1 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <!-- favorite -->
+                      <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
+                         title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
+                         class="flex items-center justify-center w-7 h-7 rounded-full bg-[#111827] hover:bg-[#1F2937] transition">
+                        {% if artwork.id in user_favorites %}
+                          <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4" alt="Favorite">
+                        {% else %}
+                          <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4 opacity-40" alt="Favorite">
+                        {% endif %}
                       </a>
+
+                      <!-- comments -->
+                      <button type="button"
+                              class="open-comments flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition text-[11px]"
+                              data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
+                              title="View comments">
+                        <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
+                        <span class="text-gray-200">
+                          {{ artwork.comment_count|default:0 }}
+                        </span>
+                      </button>
                     </div>
 
-                    <div class="mt-2 flex items-center justify-between">
-                      <div class="flex items-center gap-2">
-                        <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
-                           title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
-                           class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition">
-                          {% if artwork.id in user_favorites %}
-                            <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4" alt="Favorite">
-                          {% else %}
-                            <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4 opacity-40" alt="Favorite">
-                          {% endif %}
-                        </a>
-
-                        <button type="button"
-                                class="open-comments flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition text-[11px]"
-                                data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
-                                title="View comments">
-                          <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
-                          <span class="text-gray-200">
-                            {{ artwork.comment_count|default:0 }}
-                          </span>
-                        </button>
-                      </div>
-
-                      <div class="flex items-center gap-1 opacity-60">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
-                      </div>
+                    <!-- small dots -->
+                    <div class="flex items-center gap-1 opacity-60 pr-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
                     </div>
                   </div>
                 </div>
+              </div>
               {% endfor %}
             </div>
           {% else %}
@@ -395,10 +401,10 @@
               <div class="flex items-center justify-between bg-card-dark border border-border-dark rounded-2xl px-4 py-3 shadow">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-full bg-[#232B46] flex items-center justify-center text-xs font-semibold text-text-light">
-                    {{ post.owner.username|first|upper }}
+                    {{ post.owner.get_full_name|default:post.owner.username|first|upper }}
                   </div>
                   <div class="text-text-light">
-                    <p class="text-sm font-medium">{{ post.owner.username }}</p>
+                    <p class="text-sm font-medium">{{ post.owner.get_full_name|default:post.owner.username }}</p>
                     <p class="text-[11px] text-muted">
                       {{ post.created_at|timesince }} ago
                     </p>
@@ -431,7 +437,7 @@
     <div id="overlay" class="overlay"></div>
 
     <div id="createModal" class="modal">
-      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-4xl mx-auto shadow-2xl max-h:[90vh] overflow-y-auto">
+      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-4xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="bg-[#0B1024] rounded-2xl p-5">
           <h2 class="text-xl font-semibold text-[#A7F3D0] mb-4 text-center">Create New Collaboration</h2>
           <form method="POST" class="space-y-4">
@@ -631,37 +637,41 @@
                   ' at ' +
                   createdDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                html += `
-                <div class="snap-start min-w-[360px] md:min-w-[420px] bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-xl
-                            relative flex flex-col md:flex-row transform hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-300">
+                const firstCategory = artwork.categories && artwork.categories.length > 0
+                  ? artwork.categories[0]
+                  : null;
+                const extraCount = artwork.categories && artwork.categories.length > 1
+                  ? artwork.categories.length - 1
+                  : 0;
 
-                  <div class="md:w-1/2 relative bg-[#020617] flex items-center justify-center overflow-hidden">
+                html += `
+                <div class="snap-start bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-md
+                            relative flex flex-row h-40 transform hover:scale-[1.01] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] transition-all duration-300">
+
+                  <div class="w-44 h-full relative bg-[#020617] flex-shrink-0 overflow-hidden">
                     ${artwork.image_url ?
                       `<img src="${artwork.image_url}" alt="${artwork.title}"
-                           class="w-full h-full object-cover md:max-h-72 transition-transform duration-500 hover:scale-110">`
-                      : `<span class="text-sm text-gray-300">Image coming soon</span>`}
-
-                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
-
-                    ${artwork.categories && artwork.categories.length > 0 ? `
-                      <div class="absolute left-3 top-3 flex flex-wrap gap-1">
-                        <span class="px-2 py-1 text-[11px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
-                          ${artwork.categories[0]}
+                           class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">`
+                      : `<span class="text-xs text-gray-300 flex items-center justify-center h-full">Image coming soon</span>`}
+                    ${firstCategory ? `
+                      <div class="absolute left-2 top-2 flex flex-wrap gap-1">
+                        <span class="px-2 py-1 text-[10px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
+                          ${firstCategory}
                         </span>
-                        ${artwork.categories.length > 1 ?
-                          `<span class="px-2 py-1 text-[11px] rounded-full bg-black/40 text-gray-200 border border-white/10">
-                            +${artwork.categories.length - 1} more
+                        ${extraCount > 0 ? `
+                          <span class="px-2 py-1 text-[10px] rounded-full bg-black/40 text-gray-200 border border-white/10">
+                            +${extraCount} more
                           </span>` : ``}
                       </div>` : ``}
                   </div>
 
-                  <div class="md:w-1/2 flex flex-col justify-between px-5 py-4 gap-3">
+                  <div class="flex-1 flex flex-col justify-between px-4 py-3 gap-2">
                     <div>
-                      <p class="text-[11px] uppercase tracking-wide text-muted mb-1"></p>
-                      <h3 class="text-lg font-semibold text-white leading-tight">
+                      <p class="text-[11px] uppercase tracking-wide text-muted mb-1">Project Title</p>
+                      <h3 class="text-sm md:text-base font-semibold text-white leading-tight">
                         ${artwork.title}
                       </h3>
-                      <p class="text-xs text-gray-400 mt-1 line-clamp-2">
+                      <p class="text-[11px] text-gray-400 mt-1 line-clamp-2">
                         ${artwork.description || ''}
                       </p>
                     </div>
@@ -670,7 +680,7 @@
                       <span>${createdText}</span>
                     </div>
 
-                    <div class="mt-2 flex items-center justify-between">
+                    <div class="mt-1 flex items-center justify-between">
                       <div class="flex items-center gap-2">
                         <button type="button"
                                 class="open-comments flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition text-[11px]"
@@ -681,7 +691,7 @@
                           </span>
                         </button>
                       </div>
-                      <div class="flex items-center gap-1 opacity-60">
+                      <div class="flex items-center gap-1 opacity-60 pr-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></span>
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
@@ -710,68 +720,5 @@
       });
     }
   });
-</script>
-
-<script>
-  (function() {
-    const scroller = document.getElementById('recentUploadsScroller');
-    if (!scroller) return;
-
-    let isScrolling = false;
-    let scrollInterval = null;
-    let idleTimeout = null;
-    const IDLE_DELAY = 3000;
-    const SCROLL_SPEED = 0.5;
-
-    function startAutoScroll() {
-      if (scrollInterval) return;
-      scrollInterval = setInterval(() => {
-        if (isScrolling) return;
-        scroller.scrollLeft += SCROLL_SPEED;
-        if (scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 5) {
-          setTimeout(() => {
-            scroller.scrollLeft = 0;
-          }, 2000);
-        }
-      }, 16);
-    }
-
-    function stopAutoScroll() {
-      if (scrollInterval) {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-      }
-    }
-
-    function resetIdleTimer() {
-      isScrolling = true;
-      stopAutoScroll();
-      if (idleTimeout) clearTimeout(idleTimeout);
-      idleTimeout = setTimeout(() => {
-        isScrolling = false;
-        startAutoScroll();
-      }, IDLE_DELAY);
-    }
-
-    scroller.addEventListener('mouseenter', resetIdleTimer);
-    scroller.addEventListener('mousemove', resetIdleTimer);
-    scroller.addEventListener('scroll', resetIdleTimer);
-    scroller.addEventListener('wheel', resetIdleTimer);
-    scroller.addEventListener('touchstart', resetIdleTimer);
-    scroller.addEventListener('touchmove', resetIdleTimer);
-
-    idleTimeout = setTimeout(() => {
-      isScrolling = false;
-      startAutoScroll();
-    }, IDLE_DELAY);
-
-    scroller.addEventListener('mouseleave', () => {
-      if (idleTimeout) clearTimeout(idleTimeout);
-      idleTimeout = setTimeout(() => {
-        isScrolling = false;
-        startAutoScroll();
-      }, IDLE_DELAY);
-    });
-  })();
 </script>
 {% endblock %}
