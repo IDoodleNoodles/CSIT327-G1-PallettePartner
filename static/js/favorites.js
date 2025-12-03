@@ -1,5 +1,46 @@
+// Toast notification function
+function showToast(message, type = 'info') {
+    // Remove existing toast
+    const existingToast = document.getElementById('toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+    };
+
+    const toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    toast.style.opacity = '0';
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '1';
+    }, 10);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 2000);
+}
+
 // Favorites Toggle with AJAX
 document.addEventListener('DOMContentLoaded', function () {
+    // Check if we're on a page with dynamic content that might reattach event listeners
+    const simpleCategoryFilter = document.querySelector('.category-filter-btn');
+    if (simpleCategoryFilter) {
+        // We're on dashboard with dynamic filtering, event listeners will be managed by simple-category-filter.js
+        console.log('Favorites: Skipping event listener attachment on dashboard with dynamic filtering');
+        return;
+    }
     // Add event listeners to all favorite buttons
     const favoriteLinks = document.querySelectorAll('a[href*="toggle_favorite"]');
 
@@ -8,15 +49,16 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
 
             const url = this.href;
-            const heartIcon = this.querySelector('span');
-            const isCurrentlyFavorited = heartIcon.textContent.trim() === '❤️';
-
+            const heartIcon = this.querySelector('svg');
+            
             // Add pulse animation
-            heartIcon.style.transition = 'transform 0.2s ease';
-            heartIcon.style.transform = 'scale(1.3)';
-            setTimeout(() => {
-                heartIcon.style.transform = 'scale(1)';
-            }, 200);
+            if (heartIcon) {
+                heartIcon.style.transition = 'transform 0.2s ease';
+                heartIcon.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    heartIcon.style.transform = 'scale(1)';
+                }, 200);
+            }
 
             // Send AJAX request
             fetch(url, {
@@ -29,13 +71,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     // Toggle the heart icon based on response
                     if (data.favorited) {
-                        heartIcon.textContent = '❤️';
+                        // Change to filled heart
+                        if (heartIcon) {
+                            heartIcon.classList.remove('text-gray-400');
+                            heartIcon.classList.add('text-[#8B5CF6]');
+                        }
                         this.title = 'Remove from favorites';
 
                         // Show toast notification
-                        showToast('Added to favorites! ❤️', 'success');
+                        showToast('Added to favorites!', 'success');
                     } else {
-                        heartIcon.textContent = '🤍';
+                        // Change to outlined heart
+                        if (heartIcon) {
+                            heartIcon.classList.remove('text-[#8B5CF6]');
+                            heartIcon.classList.add('text-gray-400');
+                        }
                         this.title = 'Add to favorites';
 
                         showToast('Removed from favorites', 'info');
@@ -71,37 +121,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Toast notification function
-    function showToast(message, type = 'info') {
-        // Remove existing toast
-        const existingToast = document.getElementById('toast');
-        if (existingToast) {
-            existingToast.remove();
-        }
 
-        const colors = {
-            success: 'bg-green-500',
-            error: 'bg-red-500',
-            info: 'bg-blue-500'
-        };
-
-        const toast = document.createElement('div');
-        toast.id = 'toast';
-        toast.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
-        toast.style.opacity = '0';
-        toast.textContent = message;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '1';
-        }, 10);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 2000);
-    }
 });

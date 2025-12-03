@@ -1,12 +1,19 @@
-/* Category Filter Dropdown */
-#categoryFilterDropdown {
-  max-height: 300px;
-  overflow-y: auto;
-  position: absolute;
-  z-index: 9999;
-  top: 100%;
-  left: auto;
-  right: 0;
+/* Category Filter Buttons */
+.category-filter-btn {
+  transition: all 0.3s ease;
+}
+
+.category-filter-btn.active {
+  background-color: #8B5CF6;
+  color: white;
+  border-color: #8B5CF6;
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Special styling for the 'All' button */
+.category-filter-btn[data-category="all"] {
+  font-weight: bold;
 }
 
 /* Recent Uploads Scroller */
@@ -15,6 +22,8 @@
   scrollbar-width: thin;
   scrollbar-color: #374151 transparent;
   padding: 10px 0;
+  /* Ensure dropdown can overflow this container */
+  overflow: visible;
 }
 
 #recentUploadsScroller:hover {

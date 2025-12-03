@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}PallettePartner{% endblock %}</title>
 
     <!-- Tailwind -->
@@ -33,7 +34,6 @@
     </script>
 
     <link rel="stylesheet" href="{% static 'css/pallate.css' %}">
-    <link rel="stylesheet" href="{% static 'css/category-filter.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 

@@ -146,6 +146,9 @@ def dashboard(request):
     # Combine artwork categories with default categories
     # This ensures we always have categories to display
     all_categories = sorted(list(set(list(all_categories) + default_categories)))
+    
+    # Debug: Print categories to console
+    print(f"All categories: {all_categories}")
 
     if request.method == 'POST':
         form = CollaborationForm(request.POST)
@@ -257,7 +260,8 @@ def fetch_artworks_by_category(request):
             from django.db.models import Q
             category_filter = Q()
             for category in category_list:
-                category_filter |= Q(categories__icontains=category)
+                # Match exact categories in the comma-separated list
+                category_filter |= Q(categories__iregex=r'(?:^|,)' + category + r'(?:,|$)')
             
             artworks = Artwork.objects.filter(category_filter).select_related('user').annotate(
                 comment_count=Count('comments')

@@ -41,4 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
       closeDropdown();
     }
   });
+  
+  // Add scroll handling for notifications dropdown
+  const notificationContainer = dropdown.querySelector('.max-h-80');
+  if (notificationContainer) {
+    notificationContainer.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    });
+  }
 });

@@ -17,12 +17,36 @@ document.addEventListener('DOMContentLoaded', function () {
     // Show landing page by default
     showView('LandingPage');
 
-    // Initialize interactive features
-    initializeNavigation();
-    initializeFeedFilters();
-    initializeCardInteractions();
-    initializePortfolioFilters();
-    initializeChat();
-    initializeTimeline();
-    initializeAnimations();
+    // Skip feed filters on dashboard since it has its own category filter
+    const isDashboardPage = document.getElementById('categoryFilterButton');
+    
+    // Initialize interactive features (safely check if functions exist)
+    if (typeof initializeNavigation === 'function') {
+        initializeNavigation();
+    }
+    
+    // Only initialize feed filters if not on dashboard
+    if (!isDashboardPage && typeof initializeFeedFilters === 'function') {
+        initializeFeedFilters();
+    }
+    
+    if (typeof initializeCardInteractions === 'function') {
+        initializeCardInteractions();
+    }
+    
+    if (typeof initializePortfolioFilters === 'function') {
+        initializePortfolioFilters();
+    }
+    
+    if (typeof initializeChat === 'function') {
+        initializeChat();
+    }
+    
+    if (typeof initializeTimeline === 'function') {
+        initializeTimeline();
+    }
+    
+    if (typeof initializeAnimations === 'function') {
+        initializeAnimations();
+    }
 });
