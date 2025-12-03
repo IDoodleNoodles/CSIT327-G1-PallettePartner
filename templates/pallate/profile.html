@@ -3,15 +3,47 @@
 {% block title %}My Profile | PallettePartner{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] py-8">
+<div class="min-h-screen bg-[#0B1221] text-[#E5E7EB] py-8 relative overflow-hidden">
+  <!-- Artistic paint splash background elements -->
+  <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+    <!-- Large purple splash -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 opacity-10 blur-3xl">
+      <div class="w-full h-full rounded-full bg-[#8B5CF6] animate-pulse"></div>
+    </div>
+    
+    <!-- Medium blue splash -->
+    <div class="absolute bottom-[-5%] right-[-5%] w-80 h-80 opacity-10 blur-3xl">
+      <div class="w-full h-full rounded-full bg-[#6366F1] animate-pulse" style="animation-delay: 1s;"></div>
+    </div>
+    
+    <!-- Small teal splash -->
+    <div class="absolute top-[30%] right-[20%] w-40 h-40 opacity-15 blur-2xl">
+      <div class="w-full h-full rounded-full bg-[#A7F3D0] animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <!-- Abstract brush stroke -->
+    <div class="absolute bottom-[20%] left-[10%] w-64 h-32 opacity-5">
+      <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10,50 Q50,10 100,30 T190,40 Q180,70 150,80 T50,70 Q20,60 10,50" fill="#8B5CF6"/>
+      </svg>
+    </div>
+  </div>
   <div class="max-w-6xl mx-auto px-4">
     
     <!-- Header with Back + Title + Edit Button -->
-    <div class="mb-6">
-      <div class="grid grid-cols-3 items-center">
+    <div class="mb-6 relative">
+      <!-- Artistic splash behind header -->
+      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-64 h-64 opacity-5 -z-10">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20,100 Q50,20 100,50 T180,80 Q160,120 120,150 T60,140 Q40,120 20,100" fill="#8B5CF6"/>
+        </svg>
+      </div>
+        
+      <div class="grid grid-cols-3 items-center relative z-10">
         <div class="flex">
           <a href="{% url 'pallate:dashboard' %}"
-             class="inline-flex w-max items-center gap-2 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#8B5CF6]/50 animate-pulse">
+             class="inline-flex w-max items-center gap-2 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#8B5CF6]/50 relative overflow-hidden group">
+            <span class="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
             <span class="text-lg">←</span>
             <span>Dashboard</span>
           </a>
@@ -41,9 +73,28 @@
           <circle cx="50" cy="50" r="40" fill="#A7F3D0"/>
         </svg>
       </div>
+      
+      <!-- Additional artistic elements -->
+      <div class="absolute top-0 right-1/4 w-16 h-16 opacity-15 -z-10">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,5 90,95 10,95" fill="#6366F1"/>
+        </svg>
+      </div>
     </div>
 
     <div class="bg-[#1A2035] rounded-2xl shadow-2xl overflow-hidden border border-[#232B46] relative">
+      <!-- Artistic paint splash inside card -->
+      <div class="absolute top-0 right-0 w-64 h-64 opacity-5 -z-10">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20,100 Q50,20 100,50 T180,80 Q160,120 120,150 T60,140 Q40,120 20,100" fill="#8B5CF6"/>
+        </svg>
+      </div>
+        
+      <div class="absolute bottom-0 left-0 w-48 h-48 opacity-5 -z-10">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="80" fill="#A7F3D0"/>
+        </svg>
+      </div>
       <!-- Decorative elements -->
       <div class="absolute top-0 right-0 w-32 h-32 opacity-5 -z-10 animate-pulse">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
