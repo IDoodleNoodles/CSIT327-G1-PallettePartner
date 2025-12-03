@@ -83,6 +83,9 @@ def welcome(request):
 # Dashboard (Protected)
 @login_required(login_url='pallate:login')
 def dashboard(request):
+    # Get selected categories from query params
+    selected_categories = request.GET.getlist('categories')
+    
     # Collab posts
     posts = (
         Collaboration.objects
@@ -91,12 +94,22 @@ def dashboard(request):
     )
 
     # Artworks + number of comments per artwork
-    artworks = (
+    artworks_queryset = (
         Artwork.objects
         .select_related('user')
         .annotate(comment_count=Count('comments'))
         .order_by('-created_at')
     )
+    
+    # Filter artworks by categories if specified
+    if selected_categories:
+        # Create a Q object for OR filtering across categories
+        category_filter = Q()
+        for category in selected_categories:
+            category_filter |= Q(categories__icontains=category)
+        artworks_queryset = artworks_queryset.filter(category_filter)
+    
+    artworks = artworks_queryset
 
     # Favorites of current user
     user_favorites = Favorite.objects.filter(
@@ -116,6 +129,24 @@ def dashboard(request):
         is_read=False
     ).count()
 
+    # Define default categories
+    default_categories = [
+        'Digital Art', 'Traditional Art', 'Photography', 
+        'Illustration', 'Graphic Design', '3D Art', 
+        'Animation', 'Concept Art'
+    ]
+    
+    # Get all unique categories from artworks
+    all_artworks = Artwork.objects.all()
+    all_categories = set()
+    for artwork in all_artworks:
+        categories_list = artwork.get_categories_list()
+        all_categories.update(categories_list)
+    
+    # Combine artwork categories with default categories
+    # This ensures we always have categories to display
+    all_categories = sorted(list(set(list(all_categories) + default_categories)))
+
     if request.method == 'POST':
         form = CollaborationForm(request.POST)
         if form.is_valid():
@@ -133,6 +164,8 @@ def dashboard(request):
         'user_favorites': user_favorites,
         'notifications': notifications,
         'unread_count': unread_count,
+        'all_categories': all_categories,
+        'selected_categories': selected_categories,
     })
 
 @login_required(login_url='pallate:login')
@@ -206,6 +239,53 @@ def artist_profile(request, user_id=None):
         'show_single': False,
     }
     return render(request, 'pallate/artist_profile.html', context)
+
+# API endpoint to fetch artworks by category
+@login_required(login_url='pallate:login')
+def fetch_artworks_by_category(request):
+    from django.http import JsonResponse
+    
+    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Handle multiple categories
+        categories = request.GET.get('categories', '')
+        
+        if categories:
+            # Split categories by comma
+            category_list = [cat.strip() for cat in categories.split(',') if cat.strip()]
+            
+            # Create a Q object for OR filtering across categories
+            from django.db.models import Q
+            category_filter = Q()
+            for category in category_list:
+                category_filter |= Q(categories__icontains=category)
+            
+            artworks = Artwork.objects.filter(category_filter).select_related('user').annotate(
+                comment_count=Count('comments')
+            ).order_by('-created_at')[:20]  # Limit to 20 artworks
+        else:
+            artworks = Artwork.objects.select_related('user').annotate(
+                comment_count=Count('comments')
+            ).order_by('-created_at')[:20]
+        
+        # Serialize artworks data
+        artworks_data = []
+        for artwork in artworks:
+            artworks_data.append({
+                'id': artwork.id,
+                'title': artwork.title,
+                'description': artwork.description,
+                'image_url': artwork.image.url if artwork.image else '',
+                'user_username': artwork.user.username,
+                'user_id': artwork.user.id,
+                'created_at': artwork.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'comment_count': artwork.comment_count,
+                'categories': artwork.get_categories_list(),
+            })
+        
+        return JsonResponse({'artworks': artworks_data})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 @xframe_options_exempt
 @login_required(login_url='pallate:login')
@@ -320,6 +400,21 @@ def upload_artwork(request):
         if form.is_valid():
             artwork = form.save(commit=False)
             artwork.user = request.user
+            
+            # Handle categories - setting both category and categories fields for database compatibility
+            selected_categories = request.POST.get('selected_categories', '')
+            if selected_categories:
+                artwork.categories = selected_categories
+                # Also set the category field if it exists in the database schema
+                if hasattr(artwork, 'category'):
+                    artwork.category = selected_categories.split(',')[0]  # Use first category as the singular category
+            else:
+                # Set default category if none selected
+                artwork.categories = 'Digital Art'
+                # Also set the category field if it exists in the database schema
+                if hasattr(artwork, 'category'):
+                    artwork.category = 'Digital Art'
+            
             artwork.save()
             return redirect('pallate:dashboard')
     else:

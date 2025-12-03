@@ -11,7 +11,7 @@
 
   <!-- LEFT MENU -->
   <aside id="sidebar"
-         class="bg-[#050819] w-64 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl h-full z-40 lg:relative">
+         class="bg-[#050819] w-64 flex-shrink-0 flex flex-col py-8 px-6 border-r border-[#111827] shadow-xl h-screen fixed top-0 left-0 z-40">
 
     <h1 class="text-base font-semibold text-white flex items-center gap-2 mb-8">
       <span>Menu</span>
@@ -82,8 +82,8 @@
     </div>
   </aside>
 
-  <!-- RIGHT CONTENT AREA (scroll container) -->
-  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto relative">
+  <!-- RIGHT CONTENT AREA -->
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto relative ml-64">
 
     <!-- TOP NAV BAR -->
     <header class="flex items-center justify-between px-10 py-4 bg-[#050819] sticky top-0 z-20">
@@ -105,7 +105,6 @@
       <div class="flex items-center gap-4">
         <!-- NOTIFICATION DROPDOWN -->
         <div class="relative">
-          <!-- Bell button -->
           <button id="notifToggle"
                   type="button"
                   class="relative hover:opacity-80 transition flex items-center justify-center">
@@ -115,11 +114,9 @@
             {% endif %}
           </button>
 
-          <!-- Dropdown panel -->
           <div id="notifDropdown"
                class="hidden absolute right-0 mt-3 w-80 bg-[#050819] border border-[#232B46] rounded-2xl shadow-2xl z-50">
 
-            <!-- Header -->
             <div class="flex items-center justify-between px-4 py-3 border-b border-[#111827]">
               <div>
                 <p class="text-sm font-semibold text-[#E5E7EB]">Notifications</p>
@@ -138,19 +135,16 @@
               {% endif %}
             </div>
 
-            <!-- LIST -->
             <div class="max-h-80 overflow-y-auto py-2">
               {% if notifications %}
                 {% for n in notifications %}
                   <a href="{{ n.target_url|default:'#' }}"
                      class="flex items-start gap-3 px-4 py-3 hover:bg-[#0B1024] transition relative">
 
-                    {# unread status dot #}
                     {% if not n.is_read %}
                       <span class="absolute left-2 top-1.5 w-2 h-2 bg-[#A7F3D0] rounded-full"></span>
                     {% endif %}
 
-                    {# icon per type #}
                     <div class="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-[#0B1024] flex items-center justify-center">
                       {% if n.notification_type == 'comment' %}
                         <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comment">
@@ -163,7 +157,6 @@
                       {% endif %}
                     </div>
 
-                    {# text content #}
                     <div class="flex-1">
                       <p class="text-xs font-semibold text-[#E5E7EB]">
                         {% if n.actor %}
@@ -198,7 +191,6 @@
               {% endif %}
             </div>
 
-            <!-- Footer buttons -->
             <div class="flex items-center justify-between px-4 py-3 border-t border-[#111827] text-xs">
               <a href="#" class="px-3 py-1.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-[#E5E7EB]">
                 Show more
@@ -246,68 +238,144 @@
 
         <!-- RECENT UPLOADS -->
         <div class="bg-[#050819] rounded-3xl shadow-2xl border border-[#1F2937] px-6 py-6">
-          <h2 class="text-xl font-bold text-white mb-4">Recent Uploads</h2>
-          {% if artworks %}
-            <div id="recentUploadsScroller" class="flex flex-col gap-4 max-h-[600px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-transparent hover:scrollbar-thumb-[#4B5563]">
-              {% for artwork in artworks %}
-              <div class="grid md:grid-cols-[minmax(0,_1.3fr)_minmax(260px,_1fr)] gap-4 bg-card-dark border border-border-dark rounded-3xl p-4 shadow">
-                <!-- LEFT TEXT AREA -->
-                <div class="flex flex-col justify-between text-text-light">
-                  <div>
-                    <p class="text-xs text-muted mb-1">Project Title</p>
-                    <h3 class="text-base font-semibold">{{ artwork.title }}</h3>
-                    <p class="text-xs text-gray-400 mt-1 line-clamp-2">
-                      {{ artwork.description }}
-                    </p>
-                  </div>
-
-                  <div class="mt-3 text-[11px] text-muted">
-                    {{ artwork.created_at|timesince }} ago
-                  </div>
-
-                  <!-- ICON ROW (artist / favorite / comments) -->
-                  <div class="mt-3 flex items-center gap-3">
-                    <!-- artist icon -->
-                    <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
-                       class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                       title="Artist Profile">
-                      <img src="{% static 'icon/artist_icon.png' %}" class="w-4 h-4" alt="Artist">
-                    </a>
-
-                    <!-- favorite -->
-                    <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
-                       title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
-                       class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition">
-                      {% if artwork.id in user_favorites %}
-                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4" alt="Favorite">
-                      {% else %}
-                        <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4 opacity-40" alt="Favorite">
-                      {% endif %}
-                    </a>
-
-                    <!-- comments (icon + count) -->
-                    <button type="button"
-                            class="open-comments flex items-center gap-1 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                            data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
-                            title="View comments">
-                      <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
-                      <span class="text-[11px] text-gray-200">
-                        {{ artwork.comment_count|default:0 }}
+          <div class="flex justify-between items-center mb-4 section-header">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span></span> Recent Uploads
+            </h2>
+            
+            <!-- Category Filter Dropdown -->
+            <div class="relative">
+              <button id="categoryFilterButton" class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-[#1A2035] text-[#E5E7EB] border border-[#232B46] hover:bg-[#232B46] transition transform hover:scale-105 duration-300">
+                <span>🎨 Filter by Category</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <div id="categoryFilterDropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#1A2035] border border-[#232B46] rounded-lg shadow-2xl z-50">
+                <div class="p-2">
+                  {% for category in all_categories %}
+                  <label class="flex items-center p-2 hover:bg-[#232B46] cursor-pointer rounded transition duration-200 hover:scale-105">
+                    <input type="checkbox" name="category_filter" value="{{ category }}" class="mr-2 text-[#8B5CF6] focus:ring-[#8B5CF6] rounded" 
+                           {% if category in selected_categories %}checked{% endif %}>
+                    <span class="text-sm flex items-center gap-2">
+                      <span class="w-4 h-4 inline-block rounded-sm border border-[#8B5CF6] flex items-center justify-center {% if category in selected_categories %}bg-[#8B5CF6]{% endif %}">
+                        {% if category in selected_categories %}
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {% endif %}
                       </span>
-                    </button>
-                  </div>
+                      {{ category }}
+                    </span>
+                  </label>
+                  {% endfor %}
                 </div>
-
-                <!-- RIGHT IMAGE AREA (bigger + darker bg) -->
-                <div class="rounded-3xl bg-[#0F172A] flex items-center justify-center overflow-hidden min-h-[210px]">
-                  {% if artwork.image %}
-                    <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
-                         class="w-full h-full object-cover">
-                  {% else %}
-                    <span class="text-sm text-gray-300">Image here</span>
-                  {% endif %}
+                
+                <div class="flex justify-between p-2 border-t border-[#232B46]">
+                  <button id="clearCategoryFilter" class="px-3 py-1 text-xs text-[#8B5CF6] border border-[#8B5CF6] rounded hover:bg-[#8B5CF6]/10 transition duration-300 hover:scale-105">
+                    ❌ Clear
+                  </button>
+                  <button id="applyCategoryFilter" class="px-3 py-1 text-xs text-white bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] rounded hover:from-[#7C3AED] hover:to-[#4F46E5] transition duration-300 hover:scale-105">
+                    ✅ Apply
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {% if artworks %}
+            <div id="recentUploadsScroller"
+                 class="flex flex-col gap-4 max-h-[480px] overflow-y-auto pr-2 snap-y snap-mandatory">
+            scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-transparent hover:scrollbar-thumb-[#4B5563]">
+
+              <div id="loadingIndicator" class="hidden text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#8B5CF6]"></div>
+              </div>
+
+              {% for artwork in artworks %}
+                <div class="snap-start min-w-[360px] md:min-w-[420px] bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-xl
+                            relative flex flex-col md:flex-row transform hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-300">
+
+                  <!-- IMAGE SIDE -->
+                  <div class="md:w-1/2 relative bg-[#020617] flex items-center justify-center overflow-hidden">
+                    {% if artwork.image %}
+                      <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}"
+                           class="w-full h-full object-cover md:max-h-72 transition-transform duration-500 hover:scale-110">
+                    {% else %}
+                      <span class="text-sm text-gray-300">Image coming soon</span>
+                    {% endif %}
+
+                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
+
+                    {% if artwork.get_categories_list %}
+                      <div class="absolute left-3 top-3 flex flex-wrap gap-1">
+                        <span class="px-2 py-1 text-[11px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
+                          {{ artwork.get_categories_list.0 }}
+                        </span>
+                        {% if artwork.get_categories_list|length > 1 %}
+                          <span class="px-2 py-1 text-[11px] rounded-full bg-black/40 text-gray-200 border border-white/10">
+                            +{{ artwork.get_categories_list|length|add:"-1" }} more
+                          </span>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- TEXT / META SIDE -->
+                  <div class="md:w-1/2 flex flex-col justify-between px-5 py-4 gap-3">
+                    <div>
+                      <p class="text-[11px] uppercase tracking-wide text-muted mb-1">Project Title</p>
+                      <h3 class="text-lg font-semibold text-white leading-tight">
+                        {{ artwork.title }}
+                      </h3>
+                      <p class="text-xs text-gray-400 mt-1 line-clamp-2">
+                        {{ artwork.description }}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-1 text-[11px] text-muted">
+                      <span>{{ artwork.created_at|timesince }} ago</span>
+                      <a href="{% url 'pallate:artist_profile_by_id' artwork.user.id %}"
+                         class="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] text-[11px] text-gray-200 transition">
+                        <span class="w-5 h-5 rounded-full bg-[#1F2937] flex items-center justify-center text-[10px]">
+                          {{ artwork.user.username|first|upper }}
+                        </span>
+                        <span>{{ artwork.user.username }}</span>
+                      </a>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <a href="{% url 'pallate:toggle_favorite' artwork.id %}"
+                           title="{% if artwork.id in user_favorites %}Remove from favorites{% else %}Add to favorites{% endif %}"
+                           class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition">
+                          {% if artwork.id in user_favorites %}
+                            <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4" alt="Favorite">
+                          {% else %}
+                            <img src="{% static 'icon/favorite_icon.png' %}" class="w-4 h-4 opacity-40" alt="Favorite">
+                          {% endif %}
+                        </a>
+
+                        <button type="button"
+                                class="open-comments flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition text-[11px]"
+                                data-comments-url="{% url 'pallate:artwork_comments' artwork.id %}"
+                                title="View comments">
+                          <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
+                          <span class="text-gray-200">
+                            {{ artwork.comment_count|default:0 }}
+                          </span>
+                        </button>
+                      </div>
+
+                      <div class="flex items-center gap-1 opacity-60">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               {% endfor %}
             </div>
           {% else %}
@@ -351,8 +419,6 @@
           {% endif %}
         </aside>
       </div>
-
-
     </section>
 
     <!-- FLOATING CREATE BUTTON -->
@@ -365,13 +431,12 @@
     <div id="overlay" class="overlay"></div>
 
     <div id="createModal" class="modal">
-      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-4xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="modal-content bg-card-dark border border-border-dark p-6 rounded-2xl text-text-light max-w-4xl mx-auto shadow-2xl max-h:[90vh] overflow-y-auto">
         <div class="bg-[#0B1024] rounded-2xl p-5">
           <h2 class="text-xl font-semibold text-[#A7F3D0] mb-4 text-center">Create New Collaboration</h2>
           <form method="POST" class="space-y-4">
             {% csrf_token %}
 
-            <!-- Title -->
             <div class="space-y-1">
               <label for="id_title" class="text-sm font-medium text-muted">Title:</label>
               <input id="id_title" name="title" type="text"
@@ -381,7 +446,6 @@
                      required />
             </div>
 
-            <!-- Description -->
             <div class="space-y-1">
               <label for="id_description" class="text-sm font-medium text-muted">Description:</label>
               <textarea id="id_description" name="description" rows="4"
@@ -390,7 +454,6 @@
                         required>{{ form.description.value|default:'' }}</textarea>
             </div>
 
-            <!-- Project Type -->
             <div class="space-y-1">
               <label for="id_project_type" class="text-sm font-medium text-muted">Project Type:</label>
               <input id="id_project_type" name="project_type" type="text"
@@ -399,7 +462,6 @@
                      class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
             </div>
 
-            <!-- Tags -->
             <div class="space-y-1">
               <label for="id_tags" class="text-sm font-medium text-muted">Tags:</label>
               <input id="id_tags" name="tags" type="text"
@@ -408,7 +470,6 @@
                      class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
             </div>
 
-            <!-- Requirements -->
             <div class="space-y-1">
               <label for="id_requirements" class="text-sm font-medium text-muted">Requirements:</label>
               <textarea id="id_requirements" name="requirements" rows="3"
@@ -416,9 +477,7 @@
                         class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]">{{ form.requirements.value|default:'' }}</textarea>
             </div>
 
-            <!-- Deadline & Budget Row -->
             <div class="grid grid-cols-2 gap-4">
-              <!-- Deadline -->
               <div class="space-y-1">
                 <label for="id_deadline" class="text-sm font-medium text-muted">Deadline:</label>
                 <input id="id_deadline" name="deadline" type="date"
@@ -426,7 +485,6 @@
                        class="w-full bg-[#0F172A] border border-border-dark rounded-xl px-4 py-2 text-sm text-text-light placeholder-muted focus:outline-none focus:ring-2 focus:ring-[#A7F3D0]" />
               </div>
 
-              <!-- Budget -->
               <div class="space-y-1">
                 <label for="id_budget" class="text-sm font-medium text-muted">Budget:</label>
                 <input id="id_budget" name="budget" type="text"
@@ -487,7 +545,174 @@
 <script src="{% static 'js/notifications.js' %}"></script>
 
 <script>
-  // Auto-scroll for Recent Uploads
+  document.addEventListener('DOMContentLoaded', function() {
+    const categoryFilterButton = document.getElementById('categoryFilterButton');
+    const categoryFilterDropdown = document.getElementById('categoryFilterDropdown');
+    const applyCategoryFilter = document.getElementById('applyCategoryFilter');
+    const clearCategoryFilter = document.getElementById('clearCategoryFilter');
+    const categoryCheckboxes = document.querySelectorAll('input[name="category_filter"]');
+
+    if (categoryFilterButton) {
+      categoryFilterButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        categoryFilterDropdown.classList.toggle('hidden');
+      });
+    }
+
+    document.addEventListener('click', function(event) {
+      if (categoryFilterDropdown && !categoryFilterButton.contains(event.target) && !categoryFilterDropdown.contains(event.target)) {
+        categoryFilterDropdown.classList.add('hidden');
+      }
+    });
+
+    categoryCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const span = this.nextElementSibling.querySelector('span');
+        if (this.checked) {
+          span.classList.add('bg-[#8B5CF6]');
+          span.innerHTML = '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+        } else {
+          span.classList.remove('bg-[#8B5CF6]');
+          span.innerHTML = '';
+        }
+      });
+    });
+
+    if (clearCategoryFilter) {
+      clearCategoryFilter.addEventListener('click', function() {
+        categoryCheckboxes.forEach(cb => {
+          cb.checked = false;
+          const span = cb.nextElementSibling.querySelector('span');
+          span.classList.remove('bg-[#8B5CF6]');
+          span.innerHTML = '';
+        });
+
+        const url = new URL(window.location);
+        url.searchParams.delete('categories');
+        window.location.href = url.toString();
+      });
+    }
+
+    if (applyCategoryFilter) {
+      applyCategoryFilter.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const checkedCategories = Array.from(categoryCheckboxes)
+          .filter(cb => cb.checked)
+          .map(cb => cb.value);
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const recentUploadsScroller = document.getElementById('recentUploadsScroller');
+
+        if (loadingIndicator && recentUploadsScroller) {
+          recentUploadsScroller.innerHTML = '';
+          loadingIndicator.classList.remove('hidden');
+
+          const params = new URLSearchParams();
+          if (checkedCategories.length > 0) {
+            params.append('categories', checkedCategories.join(','));
+          }
+
+          fetch(`{% url 'pallate:fetch_artworks_by_category' %}?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            loadingIndicator.classList.add('hidden');
+
+            if (data.artworks && data.artworks.length > 0) {
+              let html = '';
+              data.artworks.forEach(artwork => {
+                const createdDate = new Date(artwork.created_at);
+                const createdText = createdDate.toLocaleDateString() +
+                  ' at ' +
+                  createdDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                html += `
+                <div class="snap-start min-w-[360px] md:min-w-[420px] bg-card-dark border border-border-dark rounded-3xl overflow-hidden shadow-xl
+                            relative flex flex-col md:flex-row transform hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-300">
+
+                  <div class="md:w-1/2 relative bg-[#020617] flex items-center justify-center overflow-hidden">
+                    ${artwork.image_url ?
+                      `<img src="${artwork.image_url}" alt="${artwork.title}"
+                           class="w-full h-full object-cover md:max-h-72 transition-transform duration-500 hover:scale-110">`
+                      : `<span class="text-sm text-gray-300">Image coming soon</span>`}
+
+                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
+
+                    ${artwork.categories && artwork.categories.length > 0 ? `
+                      <div class="absolute left-3 top-3 flex flex-wrap gap-1">
+                        <span class="px-2 py-1 text-[11px] rounded-full bg-black/70 text-[#E9D5FF] border border-[#8B5CF6]/50">
+                          ${artwork.categories[0]}
+                        </span>
+                        ${artwork.categories.length > 1 ?
+                          `<span class="px-2 py-1 text-[11px] rounded-full bg-black/40 text-gray-200 border border-white/10">
+                            +${artwork.categories.length - 1} more
+                          </span>` : ``}
+                      </div>` : ``}
+                  </div>
+
+                  <div class="md:w-1/2 flex flex-col justify-between px-5 py-4 gap-3">
+                    <div>
+                      <p class="text-[11px] uppercase tracking-wide text-muted mb-1"></p>
+                      <h3 class="text-lg font-semibold text-white leading-tight">
+                        ${artwork.title}
+                      </h3>
+                      <p class="text-xs text-gray-400 mt-1 line-clamp-2">
+                        ${artwork.description || ''}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-1 text-[11px] text-muted">
+                      <span>${createdText}</span>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <button type="button"
+                                class="open-comments flex items-center gap-1 px-3 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition text-[11px]"
+                                title="View comments">
+                          <img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments">
+                          <span class="text-gray-200">
+                            ${artwork.comment_count || 0}
+                          </span>
+                        </button>
+                      </div>
+                      <div class="flex items-center gap-1 opacity-60">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+              });
+              recentUploadsScroller.innerHTML = html;
+            } else {
+              recentUploadsScroller.innerHTML = `
+                <div class="text-center text-muted text-sm border border-dashed border-[#374151] rounded-2xl py-10 bg-[#050819] col-span-full">
+                  <p class="mb-2">🎨</p>
+                  <p>No artworks found for the selected categories.</p>
+                  <p class="text-xs mt-2">Try selecting different categories or upload your own artwork!</p>
+                </div>`;
+            }
+          })
+          .catch(error => {
+            loadingIndicator.classList.add('hidden');
+            console.error('Error:', error);
+          });
+        }
+
+        categoryFilterDropdown.classList.add('hidden');
+      });
+    }
+  });
+</script>
+
+<script>
   (function() {
     const scroller = document.getElementById('recentUploadsScroller');
     if (!scroller) return;
@@ -495,25 +720,20 @@
     let isScrolling = false;
     let scrollInterval = null;
     let idleTimeout = null;
-    const IDLE_DELAY = 3000; // 3 seconds of idle before auto-scroll starts
-    const SCROLL_SPEED = 0.5; // pixels per frame
+    const IDLE_DELAY = 3000;
+    const SCROLL_SPEED = 0.5;
 
     function startAutoScroll() {
       if (scrollInterval) return;
-      
       scrollInterval = setInterval(() => {
         if (isScrolling) return;
-
-        // Scroll down smoothly
-        scroller.scrollTop += SCROLL_SPEED;
-
-        // If reached bottom, scroll back to top
-        if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 5) {
+        scroller.scrollLeft += SCROLL_SPEED;
+        if (scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 5) {
           setTimeout(() => {
-            scroller.scrollTop = 0;
-          }, 2000); // Pause at bottom for 2 seconds
+            scroller.scrollLeft = 0;
+          }, 2000);
         }
-      }, 16); // ~60fps
+      }, 16);
     }
 
     function stopAutoScroll() {
@@ -526,16 +746,13 @@
     function resetIdleTimer() {
       isScrolling = true;
       stopAutoScroll();
-      
       if (idleTimeout) clearTimeout(idleTimeout);
-      
       idleTimeout = setTimeout(() => {
         isScrolling = false;
         startAutoScroll();
       }, IDLE_DELAY);
     }
 
-    // Listen for user interaction
     scroller.addEventListener('mouseenter', resetIdleTimer);
     scroller.addEventListener('mousemove', resetIdleTimer);
     scroller.addEventListener('scroll', resetIdleTimer);
@@ -543,13 +760,11 @@
     scroller.addEventListener('touchstart', resetIdleTimer);
     scroller.addEventListener('touchmove', resetIdleTimer);
 
-    // Start auto-scroll after initial idle period
     idleTimeout = setTimeout(() => {
       isScrolling = false;
       startAutoScroll();
     }, IDLE_DELAY);
 
-    // Stop when mouse leaves
     scroller.addEventListener('mouseleave', () => {
       if (idleTimeout) clearTimeout(idleTimeout);
       idleTimeout = setTimeout(() => {

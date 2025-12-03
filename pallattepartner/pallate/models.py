@@ -239,6 +239,7 @@ class Artwork(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='artworks/')
+    categories = models.CharField(max_length=255, blank=True, null=True, help_text='Comma-separated categories')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -246,6 +247,12 @@ class Artwork(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        
+    def get_categories_list(self):
+        """Returns list of categories from comma-separated string"""
+        if self.categories:
+            return [category.strip() for category in self.categories.split(',') if category.strip()]
+        return []
 
 
 class ArtworkComment(models.Model):

@@ -287,6 +287,13 @@ class ArtworkForm(forms.ModelForm):
             'description': 'Description',
             'image': 'Upload Image'
         }
+    
+    def save(self, commit=True):
+        artwork = super().save(commit=False)
+        # Categories will be handled in the view
+        if commit:
+            artwork.save()
+        return artwork
 
 class ArtworkCommentForm(forms.ModelForm):
     class Meta:

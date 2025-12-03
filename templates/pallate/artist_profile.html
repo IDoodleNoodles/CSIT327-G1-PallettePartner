@@ -5,11 +5,10 @@
 
 {% block content %}
 <div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
-
   {% include "pallate/_sidebar.html" %}
-
+  
   <!-- MAIN CONTENT -->
-  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto">
+  <main class="flex-1 flex flex-col bg-[#050819] overflow-y-auto ml-64">
     <!-- TOP BAR -->
     <header class="flex items-center justify-between px-10 py-4 border-b border-[#111827]">
       <div>
@@ -22,7 +21,7 @@
       <form action="{% url 'pallate:logout' %}" method="post">
         {% csrf_token %}
         <button type="submit"
-                class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition">
+                class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold px-5 py-1.5 rounded-full text-sm transition transform hover:scale-105 duration-300 shadow-lg hover:shadow-[#8B5CF6]/50 animate-pulse">
           Logout
         </button>
       </form>
@@ -37,7 +36,7 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {% for artist in artists %}
-        <div class="bg-[#0B1221] rounded-2xl border border-[#1F2937] shadow-xl overflow-hidden hover:border-[#8B5CF6] transition">
+        <div class="bg-[#0B1221] rounded-2xl border border-[#1F2937] shadow-xl overflow-hidden hover:border-[#8B5CF6] transition transform hover:-translate-y-1 duration-300 hover:shadow-[#8B5CF6]/30" style="box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);">
           <div class="p-6">
             <div class="flex items-center gap-4 mb-4">
               {% if artist.profile.avatar %}
@@ -73,8 +72,8 @@
               <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#374151] scrollbar-track-[#1F2937]">
                 {% for artwork in artist.recent_artworks %}
                 {% if artwork.image %}
-                <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-[#1F2937]">
-                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-full object-cover">
+                <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-[#1F2937] transform hover:scale-105 transition duration-300 shadow-md hover:shadow-[#A7F3D0]/30">
+                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-full object-cover hover:opacity-90 transition duration-300">
                 </div>
                 {% endif %}
                 {% endfor %}
@@ -83,8 +82,8 @@
             {% endif %}
             
             <a href="{% url 'pallate:artist_profile_by_id' artist.id %}" 
-               class="block w-full text-center bg-[#8B5CF6] hover:bg-[#7C3AED] text-white py-2 rounded-lg font-semibold transition">
-              View Profile
+               class="block w-full text-center bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white py-2 rounded-lg font-semibold transition transform hover:scale-[1.02] duration-300 flex items-center justify-center gap-2">
+              <span>👁️</span> View Profile
             </a>
           </div>
         </div>
@@ -94,16 +93,36 @@
     {% else %}
     <!-- SINGLE ARTIST VIEW (when user_id is provided) -->
     <section class="px-10 py-6">
-      <a href="{% url 'pallate:artist_profile' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] mb-4">
-        <span>←</span> Back to Discover
+      <a href="{% url 'pallate:artist_profile' %}" class="inline-flex items-center gap-2 text-[#A7F3D0] hover:text-[#7BE5B4] mb-4 transform hover:scale-105 transition duration-300">
+        ← Back to Community
       </a>
       
-      <div class="bg-[#0B1221] rounded-3xl border border-[#1F2937] shadow-2xl p-8">
+      <!-- Decorative paint stroke element -->
+      <div class="absolute right-0 top-32 w-64 h-64 opacity-10 -z-10 animate-pulse">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10,30 Q50,5 90,30 T90,90 Q50,65 10,90 T10,30" fill="#8B5CF6"/>
+        </svg>
+      </div>
+      
+      <div class="bg-[#0B1221] rounded-3xl border border-[#1F2937] shadow-2xl p-8 relative overflow-hidden">
+        <!-- Decorative corner elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 opacity-10 rotate-12 animate-pulse">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="40" fill="#A7F3D0"/>
+          </svg>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 w-24 h-24 opacity-10 -rotate-12 animate-pulse">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 90,95 10,95" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        
         <div class="flex items-start gap-6 mb-8">
           {% if artist_profile and artist_profile.avatar %}
-            <img src="{{ artist_profile.avatar.url }}" alt="{{ artist_user.username }}" class="w-32 h-32 rounded-full border-4 border-[#A7F3D0]/20 object-cover">
+            <img src="{{ artist_profile.avatar.url }}" alt="{{ artist_user.username }}" class="w-32 h-32 rounded-full border-4 border-[#A7F3D0]/20 object-cover shadow-lg">
           {% else %}
-            <div class="w-32 h-32 rounded-full bg-[#232B46] flex items-center justify-center border-4 border-[#A7F3D0]/20">
+            <div class="w-32 h-32 rounded-full bg-[#232B46] flex items-center justify-center border-4 border-[#A7F3D0]/20 shadow-lg">
               <span class="text-4xl font-bold text-[#9CA3AF]">{{ artist_user.username|first|upper }}</span>
             </div>
           {% endif %}
@@ -116,21 +135,34 @@
             {% endif %}
             
             <div class="flex gap-8 mt-4">
-              <div><span class="text-2xl font-bold text-white">{{ artworks|length }}</span><p class="text-sm text-[#9CA3AF]">Artworks</p></div>
-              <div><span class="text-2xl font-bold text-white">{{ user_collaborations|length }}</span><p class="text-sm text-[#9CA3AF]">Projects</p></div>
+              <div class="text-center">
+                <span class="text-2xl font-bold text-white">{{ artworks|length }}</span>
+                <p class="text-sm text-[#9CA3AF]">Artworks</p>
+              </div>
+              <div class="text-center">
+                <span class="text-2xl font-bold text-white">{{ user_collaborations|length }}</span>
+                <p class="text-sm text-[#9CA3AF]">Projects</p>
+              </div>
               {% if artist_profile.years_active %}
-              <div><span class="text-2xl font-bold text-white">{{ artist_profile.years_active }}</span><p class="text-sm text-[#9CA3AF]">Years Active</p></div>
+              <div class="text-center">
+                <span class="text-2xl font-bold text-white">{{ artist_profile.years_active }}</span>
+                <p class="text-sm text-[#9CA3AF]">Years Active</p>
+              </div>
               {% endif %}
             </div>
             
             {% if artist_profile.bio %}
-            <p class="text-[#D1D5DB] mt-4">{{ artist_profile.bio }}</p>
+            <p class="text-[#D1D5DB] mt-4 italic">"{{ artist_profile.bio }}"</p>
             {% endif %}
           </div>
           
           <div class="flex gap-3">
-            <button class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-4 py-2 rounded-lg transition">Follow</button>
-            <a href="{% url 'pallate:dashboard' %}" class="bg-[#232B46] hover:bg-[#374151] text-white px-4 py-2 rounded-lg transition">Message</a>
+            <button class="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-4 py-2 rounded-lg transition transform hover:scale-105 duration-300 shadow-lg flex items-center gap-2">
+              <span>❤️</span> Follow
+            </button>
+            <a href="{% url 'pallate:dashboard' %}" class="bg-gradient-to-r from-[#232B46] to-[#1F2937] hover:from-[#374151] hover:to-[#111827] text-white px-4 py-2 rounded-lg transition transform hover:scale-105 duration-300 shadow-lg flex items-center gap-2">
+              <span>✉️</span> Message
+            </a>
           </div>
         </div>
         
@@ -138,29 +170,35 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#1F2937]">
           <div class="md:col-span-1 space-y-6">
             <div>
-              <h3 class="text-lg font-semibold text-white mb-3">About</h3>
+              <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <span class="text-[#A7F3D0]">ℹ️</span> About
+              </h3>
               <ul class="space-y-2 text-sm text-[#9CA3AF]">
                 {% if artist_profile.location %}
-                <li>📍 {{ artist_profile.location }}</li>
+                <li class="flex items-center gap-2">📍 {{ artist_profile.location }}</li>
                 {% endif %}
                 {% if artist_profile.years_active %}
-                <li>📅 {{ artist_profile.years_active }} year{{ artist_profile.years_active|pluralize }} active</li>
+                <li class="flex items-center gap-2">📅 {{ artist_profile.years_active }} year{{ artist_profile.years_active|pluralize }} active</li>
                 {% endif %}
                 {% if artist_profile.availability_status %}
-                <li>🕒 {{ artist_profile.availability_status }}</li>
+                <li class="flex items-center gap-2">🕒 {{ artist_profile.availability_status }}</li>
                 {% endif %}
                 {% if artist_profile.hourly_rate %}
-                <li>💰 {{ artist_profile.hourly_rate }}</li>
+                <li class="flex items-center gap-2">💰 {{ artist_profile.hourly_rate }}</li>
                 {% endif %}
               </ul>
             </div>
             
             {% if artist_profile.interests %}
             <div>
-              <h3 class="text-lg font-semibold text-white mb-3">Skills & Interests</h3>
+              <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <span class="text-[#8B5CF6]">🎨</span> Skills & Interests
+              </h3>
               <div class="flex flex-wrap gap-2">
                 {% for interest in artist_profile.get_interests_list %}
-                <span class="px-3 py-1 rounded-full text-xs bg-[#8B5CF6]/20 text-[#E9D5FF] border border-[#8B5CF6]/30">{{ interest }}</span>
+                <span class="px-3 py-1 rounded-full text-xs bg-gradient-to-r from-[#8B5CF6]/20 to-[#6366F1]/20 text-[#E9D5FF] border border-[#8B5CF6]/30 transform hover:scale-105 transition duration-300 shadow-md hover:shadow-[#8B5CF6]/30">
+                  {{ interest }}
+                </span>
                 {% endfor %}
               </div>
             </div>
@@ -169,13 +207,15 @@
           
           <div class="md:col-span-2 space-y-6">
             <div>
-              <h3 class="text-lg font-semibold text-white mb-4">Portfolio</h3>
+              <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span class="text-[#A7F3D0]">🖼️</span> Portfolio
+              </h3>
               {% if artworks %}
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
                 {% for artwork in artworks %}
-                <div class="bg-[#050819] rounded-lg overflow-hidden border border-[#1F2937] hover:border-[#8B5CF6] transition">
+                <div class="bg-[#050819] rounded-lg overflow-hidden border border-[#1F2937] hover:border-[#8B5CF6] transition transform hover:-translate-y-1 duration-300 shadow-md hover:shadow-[#8B5CF6]/30">
                   {% if artwork.image %}
-                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-40 object-cover">
+                  <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="w-full h-40 object-cover hover:scale-105 transition duration-300">
                   {% endif %}
                   <div class="p-3">
                     <h4 class="font-semibold text-white text-sm">{{ artwork.title }}</h4>
@@ -190,16 +230,20 @@
             </div>
             
             <div>
-              <h3 class="text-lg font-semibold text-white mb-4">Active Collaborations</h3>
+              <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span class="text-[#8B5CF6]">🤝</span> Active Collaborations
+              </h3>
               {% if user_collaborations %}
               <div class="space-y-3">
                 {% for collab in user_collaborations %}
-                <div class="bg-[#050819] p-4 rounded-lg border border-[#1F2937] flex justify-between items-center">
+                <div class="bg-[#050819] p-4 rounded-lg border border-[#1F2937] flex justify-between items-center hover:bg-[#0B1024] transition duration-300 shadow-md hover:shadow-[#8B5CF6]/30">
                   <div>
                     <h4 class="font-semibold text-white">{{ collab.title }}</h4>
                     <p class="text-sm text-[#9CA3AF]">{{ collab.created_at|timesince }} ago</p>
                   </div>
-                  <a href="{% url 'pallate:collaboration_detail' collab.id %}" class="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-3 py-1 rounded text-sm">View</a>
+                  <a href="{% url 'pallate:collaboration_detail' collab.id %}" class="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-3 py-1 rounded text-sm transform hover:scale-105 transition duration-300 flex items-center gap-1 hover:shadow-[#6366F1]/30">
+                    <span>🔗</span> View
+                  </a>
                 </div>
                 {% endfor %}
               </div>
