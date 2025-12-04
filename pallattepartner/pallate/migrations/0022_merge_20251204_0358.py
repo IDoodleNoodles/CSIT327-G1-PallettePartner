@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pallate', '0018_artwork_category'),
+        ('pallate', '0018_artwork_categories'),
         ('pallate', '0021_alter_artwork_categories'),
     ]
 
