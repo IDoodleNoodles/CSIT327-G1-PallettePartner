@@ -6,6 +6,50 @@
 {% block content %}
 <div class="min-h-screen flex bg-[#050819] text-[#E5E7EB]">
 
+  <style>
+    /* Artistic dropdown + buttons styling */
+    #categoryDropdown {
+      background: linear-gradient(180deg, rgba(13,16,30,0.98) 0%, rgba(18,21,38,0.95) 100%);
+      box-shadow: 0 8px 30px rgba(11,14,30,0.6);
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(139,92,246,0.12);
+    }
+
+    #categoryDropdown label { cursor: pointer; }
+
+    /* check icon animation */
+    .check-icon { transition: transform 180ms ease, opacity 180ms ease; transform-origin: center; }
+    .check-icon.text-transparent { opacity: 0; transform: scale(0.8) translateX(4px); }
+    .check-icon.text-\[\#8B5CF6\] { opacity: 1; transform: scale(1) translateX(0); }
+
+    /* Apply/Clear buttons */
+    #categoryApply,
+    #categoryClear {
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    #categoryApply:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 18px rgba(139,92,246,0.24); }
+    #categoryClear:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.28); }
+
+    /* Floating create button animation */
+    @keyframes floatPop { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } 100% { transform: translateY(0) scale(1); } }
+    #addPostBtn { animation: floatPop 4s ease-in-out infinite; box-shadow: 0 10px 30px rgba(167,243,208,0.12); }
+
+    /* Card hover effect */
+    .recent-upload-card { transition: transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s ease, background .18s ease; }
+    .recent-upload-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(2,6,23,0.6); }
+
+    /* Make icons pop on hover */
+    .recent-upload-card .flex.items-center a img,
+    .recent-upload-card .open-comments img { transition: transform .16s ease, filter .16s ease; }
+    .recent-upload-card .flex.items-center a:hover img,
+    .recent-upload-card .open-comments:hover img { transform: scale(1.08); filter: drop-shadow(0 6px 10px rgba(139,92,246,0.12)); }
+
+    /* Dropdown scrollbar styling */
+    #categoryDropdown .max-h-44::-webkit-scrollbar { width: 8px; }
+    #categoryDropdown .max-h-44::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#5B21B6,#8B5CF6); border-radius: 999px; }
+  </style>
+
   <!-- Mobile Overlay -->
   <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
 
@@ -103,12 +147,6 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <!-- PROFILE -->
-        <a href="{% url 'pallate:profile' %}" 
-           class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-           title="Profile">
-          <img src="{% static 'icon/profile_icon.png' %}" class="w-5 h-5" alt="Profile">
-        </a>
         
         <!-- NOTIFICATION DROPDOWN -->
         <div class="relative">
@@ -250,23 +288,42 @@
               <span></span> Recent Uploads
             </h2>
             
-              <!-- Simple Category Filter -->
-              <div class="flex flex-wrap gap-2">
-                <span class="text-sm text-muted mr-2 self-center">Filter:</span>
-                <button type="button" 
-                        class="category-filter-btn px-3 py-1 text-sm rounded-full bg-[#8B5CF6] text-white border border-[#8B5CF6] hover:bg-[#7C3AED] hover:text-white transition duration-300 active"
-                        data-category="all"
-                        onclick="if(typeof handleCategoryFilterFallback === 'function') handleCategoryFilterFallback(this);">
-                  All
+              <!-- Category Filter Dropdown (multi-select) -->
+              <div class="relative">
+                <span class="text-sm text-muted mr-2 self-center mr-3">Filter:</span>
+                <button id="categoryDropdownToggle" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full bg-[#1A2035] text-[#E5E7EB] border border-[#232B46] hover:bg-[#8B5CF6] hover:text-white transition duration-200">
+                  <span id="selectedCategoriesText">All</span>
+                  <svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
-                {% for category in all_categories %}
-                <button type="button" 
-                        class="category-filter-btn px-3 py-1 text-sm rounded-full bg-[#1A2035] text-[#E5E7EB] border border-[#232B46] hover:bg-[#8B5CF6] hover:text-white transition duration-300"
-                        data-category="{{ category }}"
-                        onclick="if(typeof handleCategoryFilterFallback === 'function') handleCategoryFilterFallback(this);">
-                  {{ category }}
-                </button>
-                {% endfor %}
+
+                <div id="categoryDropdown" class="hidden absolute right-0 mt-2 w-64 bg-card-dark border border-border-dark rounded-lg shadow-lg z-50 p-3">
+                  <div class="flex items-center gap-2 mb-2">
+                    <input id="cat_all" type="checkbox" data-category="all" class="h-4 w-4" checked>
+                    <label for="cat_all" class="text-sm text-text-light">All</label>
+                  </div>
+
+                  <div class="max-h-44 overflow-y-auto py-1">
+                    {% for category in all_categories %}
+                    <label class="flex items-center justify-between gap-2 py-1">
+                      <div class="flex items-center gap-2">
+                        <input type="checkbox" class="category-checkbox h-4 w-4" data-category="{{ category }}" id="cat_{{ forloop.counter }}">
+                        <span class="text-sm text-text-light">{{ category }}</span>
+                      </div>
+                      <svg class="w-4 h-4 text-transparent check-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8z" clip-rule="evenodd" />
+                      </svg>
+                    </label>
+                    {% endfor %}
+                  </div>
+
+                  <div class="pt-3 flex justify-end gap-2">
+                    <button id="categoryClear" type="button" class="px-3 py-1 rounded-full bg-[#232B46] hover:bg-[#374151] text-text-light text-sm">Clear</button>
+                    <button id="categoryApply" type="button" class="px-3 py-1 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm">Apply</button>
+                  </div>
+                </div>
               </div>
           </div>
 
@@ -532,208 +589,219 @@
   </main>
 </div>
 
-<!-- Fallback JavaScript for category filtering -->
+<!-- Category filter dropdown script -->
 <script>
-// Fallback function in case the main JavaScript file fails to load
-function handleCategoryFilterFallback(button) {
-  console.log('Fallback category filter clicked');
-  
-  var category = button.getAttribute('data-category');
-  console.log('Category:', category);
-  
-  // If "All" category is clicked, remove active state from all other buttons and activate "All"
-  if (category === 'all') {
-    // Remove active class from all buttons
-    document.querySelectorAll('.category-filter-btn').forEach(function(btn) {
-      btn.classList.remove('active');
-    });
-    
-    // Activate the "All" button
-    button.classList.add('active');
-    
-    // Show all artworks
-    console.log('Showing all artworks');
-    window.location.href = window.location.pathname;
-    return;
-  }
-  
-  // Deactivate the "All" button when any other category is selected
-  var allButton = document.querySelector('.category-filter-btn[data-category="all"]');
-  if (allButton) {
-    allButton.classList.remove('active');
-  }
-  
-  // Toggle active state for the clicked category
-  button.classList.toggle('active');
-  
-  // Get all active categories
-  var activeButtons = document.querySelectorAll('.category-filter-btn.active');
-  var activeCategories = [];
-  activeButtons.forEach(function(btn) {
-    // Only add non-'all' categories
-    if (btn.getAttribute('data-category') !== 'all') {
-      activeCategories.push(btn.getAttribute('data-category'));
+document.addEventListener('DOMContentLoaded', function() {
+  var toggle = document.getElementById('categoryDropdownToggle');
+  var dropdown = document.getElementById('categoryDropdown');
+  var catAll = document.getElementById('cat_all');
+  var checkboxes = Array.from(document.querySelectorAll('.category-checkbox'));
+  var applyBtn = document.getElementById('categoryApply');
+  var clearBtn = document.getElementById('categoryClear');
+  var selectedText = document.getElementById('selectedCategoriesText');
+
+  function closeDropdown() { dropdown.classList.add('hidden'); }
+  function openDropdown() { dropdown.classList.remove('hidden'); }
+
+  // Toggle dropdown
+  if (toggle) toggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('hidden');
+  });
+
+  // Click outside to close
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+      closeDropdown();
     }
   });
-  
-  console.log('Active categories:', activeCategories);
-  
-  // If no categories are selected, reload the page
-  if (activeCategories.length === 0) {
-    console.log('No categories selected, showing all artworks');
-    // Activate the "All" button
-    if (allButton) {
-      allButton.classList.add('active');
-    }
-    window.location.href = window.location.pathname;
-    return;
+
+  // When 'All' is checked -> uncheck others
+  if (catAll) {
+    catAll.addEventListener('change', function() {
+      if (catAll.checked) {
+        checkboxes.forEach(function(cb){ cb.checked = false; toggleCheckIcon(cb); });
+        updateSelectedText();
+      }
+    });
   }
-  
-  // Show loading indicator
-  var loadingIndicator = document.getElementById('loadingIndicator');
-  var recentUploadsScroller = document.getElementById('recentUploadsScroller');
-  
-  if (loadingIndicator && recentUploadsScroller) {
-    recentUploadsScroller.innerHTML = '';
-    loadingIndicator.classList.remove('hidden');
+
+  function toggleCheckIcon(cb) {
+    var label = cb.closest('label');
+    if (!label) return;
+    var icon = label.querySelector('.check-icon');
+    if (!icon) return;
+    if (cb.checked) {
+      icon.classList.remove('text-transparent');
+      icon.classList.add('text-[#8B5CF6]');
+    } else {
+      icon.classList.add('text-transparent');
+      icon.classList.remove('text-[#8B5CF6]');
+    }
   }
-  
-  // Build query parameters
-  var params = new URLSearchParams();
-  params.append('categories', activeCategories.join(','));
-  
-  // Get CSRF token
-  var csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-  var csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
-  
-  // Make request
-  fetch('/api/fetch-artworks-by-category/?' + params.toString(), {
-    method: 'GET',
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-CSRFToken': csrfToken
+
+  checkboxes.forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      if (cb.checked) {
+        if (catAll) { catAll.checked = false; }
+      }
+      toggleCheckIcon(cb);
+    });
+  });
+
+  function getSelectedCategories() {
+    var selected = checkboxes.filter(function(cb){ return cb.checked; }).map(function(cb){ return cb.getAttribute('data-category'); });
+    return selected;
+  }
+
+  function updateSelectedText() {
+    var selected = getSelectedCategories();
+    if (selected.length === 0) {
+      selectedText.textContent = 'All';
+    } else if (selected.length === 1) {
+      selectedText.textContent = selected[0];
+    } else {
+      selectedText.textContent = selected.length + ' selected';
     }
-  })
-  .then(function(response) {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+  }
+
+  clearBtn.addEventListener('click', function() {
+    checkboxes.forEach(function(cb){ cb.checked = false; toggleCheckIcon(cb); });
+    if (catAll) catAll.checked = true;
+    updateSelectedText();
+  });
+
+  // Reuse the existing loading and rendering logic but driven by selected categories
+  applyBtn.addEventListener('click', function() {
+    var activeCategories = getSelectedCategories();
+    if (!activeCategories || activeCategories.length === 0) {
+      // treat as 'all' -> reload to show all
+      window.location.href = window.location.pathname;
+      return;
     }
-    return response.json();
-  })
-  .then(function(data) {
-    if (loadingIndicator) {
-      loadingIndicator.classList.add('hidden');
+
+    updateSelectedText();
+    closeDropdown();
+
+    var loadingIndicator = document.getElementById('loadingIndicator');
+    var recentUploadsScroller = document.getElementById('recentUploadsScroller');
+    if (loadingIndicator && recentUploadsScroller) {
+      recentUploadsScroller.innerHTML = '';
+      loadingIndicator.classList.remove('hidden');
     }
-    
-    if (!data.artworks || data.artworks.length === 0) {
-      if (recentUploadsScroller) {
-        recentUploadsScroller.innerHTML = `
+
+    var params = new URLSearchParams();
+    params.append('categories', activeCategories.join(','));
+
+    var csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+    var csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
+
+    fetch('/api/fetch-artworks-by-category/?' + params.toString(), {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      }
+    })
+    .then(function(response){ if (!response.ok) throw new Error('Network response was not ok'); return response.json(); })
+    .then(function(data){
+      if (loadingIndicator) loadingIndicator.classList.add('hidden');
+      if (!data.artworks || data.artworks.length === 0) {
+        if (recentUploadsScroller) recentUploadsScroller.innerHTML = `
           <div class="text-center text-muted text-sm border border-dashed border-[#374151] rounded-2xl py-10 bg-[#050819]">
             <p class="mb-2">🎨</p>
             <p>No artworks found for the selected categories.</p>
             <p class="text-xs mt-2">Try selecting different categories or upload your own artwork!</p>
           </div>`;
+        return;
       }
-      return;
-    }
-    
-    var html = '';
-    data.artworks.forEach(function(artwork) {
-      var createdDate = new Date(artwork.created_at);
-      var createdText =
-        createdDate.toLocaleDateString() +
-        ' at ' +
-        createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      var categories = artwork.categories || [];
-      var categoryChips = categories
-        .map(function(cat) {
-          return '<span class="px-2 py-1 text-xs rounded-full bg-[#8B5CF6]/20 text-[#E9D5FF] border border-[#8B5CF6]/30 category-tag">' + cat + '</span>';
-        })
-        .join('');
-      
-      html += `
-        <div class="snap-start grid md:grid-cols-[minmax(0,_1.3fr)_minmax(260px,_1fr)] gap-4 bg-card-dark border border-border-dark rounded-3xl p-4 shadow recent-upload-card">
-          <div class="flex flex-col justify-between text-text-light">
-            <div>
-              <p class="text-xs text-muted mb-1 flex items-center gap-1">
-                <span>📋</span> Project Title
-              </p>
-              <h3 class="text-base font-semibold text-white">${artwork.title || ''}</h3>
-              <p class="text-xs text-gray-400 mt-1 line-clamp-2">
-                ${artwork.description || ''}
-              </p>
-              ${categories.length ? '<div class="mt-2 flex flex-wrap gap-1">' + categoryChips + '</div>' : ''}
+
+      var html = '';
+      data.artworks.forEach(function(artwork) {
+        var createdDate = new Date(artwork.created_at || Date.now());
+        var createdText = createdDate.toLocaleDateString() + ' at ' + createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        var categories = artwork.categories || [];
+        var categoryChips = categories.map(function(cat){ return '<span class="px-2 py-1 text-xs rounded-full bg-[#8B5CF6]/20 text-[#E9D5FF] border border-[#8B5CF6]/30 category-tag">' + cat + '</span>'; }).join('');
+
+        html += `
+          <div class="snap-start grid md:grid-cols-[minmax(0,_1.3fr)_minmax(260px,_1fr)] gap-4 bg-card-dark border border-border-dark rounded-3xl p-4 shadow recent-upload-card">
+            <div class="flex flex-col justify-between text-text-light">
+              <div>
+                <p class="text-xs text-muted mb-1 flex items-center gap-1"><span>📋</span> Project Title</p>
+                <h3 class="text-base font-semibold text-white">${artwork.title || ''}</h3>
+                <p class="text-xs text-gray-400 mt-1 line-clamp-2">${artwork.description || ''}</p>
+                ${categories.length ? '<div class="mt-2 flex flex-wrap gap-1">' + categoryChips + '</div>' : ''}
+              </div>
+              <div class="mt-3 text-[11px] text-muted flex items-center gap-1"><span>⏱️</span> ${createdText}</div>
+              <div class="mt-3 flex items-center gap-3">
+                <a href="/artist/${artwork.user_id}/" class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition" title="Artist Profile">
+                  <img src="{% static 'icon/artist_icon.png' %}" class="w-4 h-4" alt="Artist">
+                </a>
+                ${artwork.id ? `<a href="/toggle-favorite/${artwork.id}/" class="toggle-favorite flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition" title="Add to favorites"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg><span class="ml-1 text-[11px] text-gray-300">${artwork.favorite_count || 0}</span></a>` : ''}
+                ${artwork.id ? `<button type="button" class="open-comments flex items-center gap-1 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition" data-comments-url="/artwork/${artwork.id}/comments/" title="View comments"><img src="{% static 'icon/comment_icon.png' %}" class="w-4 h-4" alt="Comments"><span class="text-[11px] text-gray-200">${artwork.comment_count || 0}</span></button>` : ''}
+              </div>
             </div>
-            
-            <div class="mt-3 text-[11px] text-muted flex items-center gap-1">
-              <span>⏱️</span> ${createdText}
+            <div class="rounded-3xl bg-[#0F172A] flex items-center justify-center overflow-hidden min-h-[210px] relative">
+              ${artwork.image_url ? `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover transition duration-300"><div class="absolute inset-0 bg-gradient-to-t from-[#050819] to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-4"><span class="text-white text-sm font-semibold truncate max-w-full">${artwork.title || ''}</span></div>` : '<span class="text-sm text-gray-300">🖼️ Image here</span>'}
             </div>
-            
-            <div class="mt-3 flex items-center gap-3">
-              <a href="/artist/${artwork.user_id}/"
-                 class="flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                 title="Artist Profile">
-                <img src="/static/icon/artist_icon.png" class="w-4 h-4" alt="Artist">
-              </a>
-              
-              ${artwork.id ? `
-              <a href="/toggle-favorite/${artwork.id}/"
-                 class="toggle-favorite flex items-center justify-center w-8 h-8 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                 title="Add to favorites">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span class="ml-1 text-[11px] text-gray-300">
-                  ${artwork.favorite_count || 0}
-                </span>
-              </a>` : ''}
-              
-              ${artwork.id ? `
-              <button type="button"
-                      class="open-comments flex items-center gap-1 px-2 py-1 rounded-full bg-[#111827] hover:bg-[#1F2937] transition"
-                      data-comments-url="/artwork/${artwork.id}/comments/"
-                      title="View comments">
-                <img src="/static/icon/comment_icon.png" class="w-4 h-4" alt="Comments">
-                <span class="text-[11px] text-gray-200">
-                  ${artwork.comment_count || 0}
-                </span>
-              </button>` : ''}
-            </div>
-          </div>
-          
-          <div class="rounded-3xl bg-[#0F172A] flex items-center justify-center overflow-hidden min-h-[210px] relative">
-            ${artwork.image_url ? `
-              <img src="${artwork.image_url}" alt="${artwork.title || ''}"
-                   class="w-full h-full object-cover transition duration-300">
-              <div class="absolute inset-0 bg-gradient-to-t from-[#050819] to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-4">
-                <span class="text-white text-sm font-semibold truncate max-w-full">
-                  ${artwork.title || ''}
-                </span>
-              </div>` : '<span class="text-sm text-gray-300">🖼️ Image here</span>'}
-          </div>
-        </div>`;
-    });
-    
-    if (recentUploadsScroller) {
-      recentUploadsScroller.innerHTML = html;
-    }
-  })
-  .catch(function(error) {
-    console.error('Error:', error);
-    if (loadingIndicator) {
-      loadingIndicator.classList.add('hidden');
-    }
-    if (recentUploadsScroller) {
-      recentUploadsScroller.innerHTML = `
+          </div>`;
+      });
+
+      if (recentUploadsScroller) {
+        recentUploadsScroller.innerHTML = html;
+        // Re-attach open-comments listeners for newly injected content
+        attachOpenCommentsListeners(recentUploadsScroller);
+      }
+    })
+    .catch(function(error){
+      console.error('Error:', error);
+      var loadingIndicator = document.getElementById('loadingIndicator');
+      var recentUploadsScroller = document.getElementById('recentUploadsScroller');
+      if (loadingIndicator) loadingIndicator.classList.add('hidden');
+      if (recentUploadsScroller) recentUploadsScroller.innerHTML = `
         <div class="text-center text-red-400 text-sm border border-dashed border-[#374151] rounded-2xl py-10 bg-[#050819]">
           <p class="mb-2">⚠️</p>
           <p>Error loading artworks. Please try again.</p>
         </div>`;
-    }
+    });
   });
-}
+
+  // Helper to attach comment button handlers to dynamically added elements
+  function attachOpenCommentsListeners(container) {
+    container = container || document;
+    var openButtons = container.querySelectorAll('.open-comments');
+    var commentsPanel = document.getElementById('commentsPanel');
+    var commentsFrame = document.getElementById('commentsFrame');
+
+    openButtons.forEach(function(btn) {
+      // Remove any existing to avoid duplicates
+      btn.removeEventListener('click', openCommentsHandler);
+      btn.addEventListener('click', openCommentsHandler);
+    });
+
+    function openCommentsHandler(e) {
+      e.preventDefault();
+      var url = this.getAttribute('data-comments-url');
+      if (!url) { console.error('No comments URL found'); return; }
+
+      if (commentsFrame) commentsFrame.src = url;
+      if (commentsPanel) commentsPanel.classList.remove('hidden');
+
+      // prevent background scroll and add backdrop
+      document.body.style.overflow = 'hidden';
+      if (!document.getElementById('commentsBackdrop')) {
+        document.body.insertAdjacentHTML('beforeend', '<div id="commentsBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40"></div>');
+        var backdrop = document.getElementById('commentsBackdrop');
+        if (backdrop) backdrop.addEventListener('click', function(){
+          // reuse close handler if available
+          if (typeof closeCommentsPanelHandler === 'function') closeCommentsPanelHandler();
+          else { commentsPanel.classList.add('hidden'); document.body.style.overflow = ''; if (backdrop) backdrop.remove(); }
+        });
+      }
+    }
+  }
+
+});
 </script>
 
 <!-- JS -->
